@@ -1,0 +1,10 @@
+name: ItemCollector
+version: 1.0.0
+main: mc.itemcollector.ItemCollector
+author: BOG500
+description: Collect all the items in Minecraft !
+
+commands:
+     itemcollector:
+          usage: /<command>
+          description: Test Command

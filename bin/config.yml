@@ -1,0 +1,27 @@
+minX: -100
+minZ: -100
+maxX: 100
+maxZ: 100
+collectAnimals: true
+collectItems: true
+annonceInventoryItemsOnPlayerJoin: true
+annonceInventoryAnimalsOnPlayerJoin: true
+annonceNewItems: true
+annonceNewAnimals: true
+updateItemsOnChestClosed: true
+updateAnimalsOnAnimalFeed: true
+messagePrefix: "\xa7o\xa77[\xa7aItemCollector\xa77]\xa7r"
+annonceInventoryItemsOnPlayerJoinMessage: "\xa74Item collection: \xa72<nbCollectedItems>\
+  \ / <nbTotalItems>"
+annonceInventoryAnimalsOnPlayerJoinMessage: "\xa74Animal collection: \xa72 <nbCollectedAnimals>\
+  \ / <nbTotalAnimals>"
+annonceNewItemsMessage: "\xa74New item in the collection: \xa7l\xa7a<itemName>"
+annonceNewAnimalsMessage: "\xa74New animal in the collection: \xa7l\xa7a<animalName>"
+itemsCollection:
+- '1': true
+  '1:1': true
+  '1:2': true
+animalsCollection:
+- Rabbit: true
+  Cow: true
+  Pig: true
