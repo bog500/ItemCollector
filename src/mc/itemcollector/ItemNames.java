@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.WordUtils;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 public enum ItemNames {
 	ACACIA_STAIRS("acacia wood stairs"), 
@@ -424,6 +426,39 @@ public String toString() {
 }
 
 private static final Map<String, ItemNames> lookup = new HashMap<String, ItemNames>();
+
+public static String getAnimalDisplayName(String key) {
+	try {
+		return ItemNames.valueOf(key.toUpperCase()).firstUpperCased();
+	}catch(Exception ex) {
+		return key;
+	}
+}
+
+public static String getBlockDisplayName(String key) {
+	try {
+		
+		String[] splitted = key.split(":");
+		int id = Integer.parseInt(splitted[0]);
+		int variant = -1;
+		ItemStack is;
+		String bukkitName;	
+		if(splitted.length == 2) {
+			variant = Integer.parseInt(splitted[1]);
+			is = new ItemStack(id, 1, (short)variant);
+			Material mat = is.getType();
+			bukkitName = mat.name() + "__" + variant;	
+		}else {
+			is = new ItemStack(id, 1);
+			Material mat = is.getType();
+			bukkitName = mat.name();	
+		}
+		
+		return ItemNames.valueOf(key.toUpperCase()).firstUpperCased();
+	}catch(Exception ex) {
+		return key;
+	}
+}
 
 // Returns the Material name from the given block name
 public static String getMaterialName(String fromBlockName) {

@@ -10,7 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
@@ -26,11 +25,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Wool;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ItemCollector extends JavaPlugin implements Listener {
@@ -83,16 +82,78 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		//setDefaultConfig();
 		getSavedConfig();
 		Bukkit.getServer().getPluginManager().registerEvents(this, this);
-		getChestsAndSigns();
+		
 		refreshCollections();
 	}
 	
 	@Override
 	public void onDisable() {
+		saveNewConfig();
 		Bukkit.getServer().getLogger().info("ItemCollector Disabled!");
 	}
 	
-	
+	private void saveNewConfig() {
+	    FileConfiguration config = getConfig();
+	    config.set("minX", minX);
+	    config.set("minZ", minZ);
+	    config.set("maxX", maxX);
+	    config.set("maxZ", maxZ);
+	    
+	    config.set("collectAnimals", collectAnimals);
+	    config.set("collectItems", collectItems);
+	    	    
+	    config.set("annonceInventoryItemsOnPlayerJoin", annonceInventoryItemsOnPlayerJoin);
+	    config.set("annonceInventoryAnimalsOnPlayerJoin", annonceInventoryAnimalsOnPlayerJoin);
+	    
+	    config.set("annonceNewItems", annonceNewItems);
+	    config.set("annonceNewAnimals", annonceNewAnimals);
+	    
+	    config.set("updateItemsOnChestClosed", updateItemsOnChestClosed);
+	    config.set("updateAnimalsOnAnimalFeed", updateAnimalsOnAnimalFeed);
+	    
+	    config.set("messagePrefix", messagePrefix);
+	    config.set("annonceInventoryItemsOnPlayerJoinMessage", annonceInventoryItemsOnPlayerJoinMessage);
+	    config.set("annonceInventoryAnimalsOnPlayerJoinMessage", annonceInventoryAnimalsOnPlayerJoinMessage);
+	    config.set("annonceNewItemsMessage", annonceNewItemsMessage);
+	    config.set("annonceNewAnimalsMessage", annonceNewAnimalsMessage);
+	        
+	    HashMap<String,Boolean> items = new HashMap<String,Boolean>();
+	    
+	    for(String s : itemsToCollect) {
+	    	items.put(s, true);
+	    }
+	    for (Map.Entry<?, ?> entry : itemsCollection.get(0).entrySet()) {
+	    	String key = entry.getKey().toString().toLowerCase();
+	    	if(!items.containsKey(key)) {
+	    		items.put(key, false);
+	    	}
+	    }
+	    
+	    HashMap<String,Boolean> animals = new HashMap<String,Boolean>();
+	    
+	    for(String s : animalsToCollect) {
+	    	animals.put(s, true);
+	    }
+	    for (Map.Entry<?, ?> entry : animalsCollection.get(0).entrySet()) {
+	    	String key = entry.getKey().toString().toLowerCase();
+	    	if(!animals.containsKey(key)) {
+	    		animals.put(key, false);
+	    	}
+	    }
+	    
+	    itemsCollection = new ArrayList();
+	    animalsCollection = new ArrayList();
+	    	    	    
+	    itemsCollection.add(items);
+	    animalsCollection.add(animals);
+	    
+	    config.set("itemsCollection", itemsCollection);
+	    config.set("animalsCollection", animalsCollection);
+	   
+	    config.options().copyDefaults(true);
+	    saveConfig();
+	}
+		
 	@SuppressWarnings("unchecked")
 	private void setDefaultConfig() {
 	    FileConfiguration config = getConfig();
@@ -195,53 +256,89 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	}
 	
 	@EventHandler
-    public void onPlayerJoin(PlayerJoinEvent e) {
-            Player p = e.getPlayer();
-            p.sendMessage(ChatColor.GREEN + "Welcome to the server!");
-    }
-	
+	public void onPlayerJoin(PlayerJoinEvent e) {
+		Player player = e.getPlayer();
+		if (annonceInventoryAnimalsOnPlayerJoin && collectAnimals) {
+			String msg = getMessage(annonceInventoryAnimalsOnPlayerJoinMessage, "");
+			player.sendMessage(msg);
+		}
+		if (annonceInventoryItemsOnPlayerJoin && collectItems) {
+			String msg = getMessage(annonceInventoryItemsOnPlayerJoinMessage, "");
+			player.sendMessage(msg);
+		}
+
+	}
+
 	@EventHandler
 	public void invClose(InventoryCloseEvent event) {
-		// Cancel method if not a chest
-		if(!(event.getInventory().getHolder() instanceof Chest)) return;
-		Chest c = (Chest)event.getInventory().getHolder();
-		// do something
-	}
-	
-	@EventHandler
-    public void onPlayerInteract(PlayerInteractEvent e) {
-            if (!(e.getAction() == Action.RIGHT_CLICK_BLOCK)) return;
-            if (e.getClickedBlock().getState() instanceof Animals) {
-            	Animals a = (Animals)e.getClickedBlock().getState();
-            	addAnimal(a);
-            }
-            if (e.getClickedBlock().getState() instanceof Sign) {
-                Sign sign = (Sign) e.getClickedBlock().getState();
-                updateSign(sign);
-            }
-    }
-
-    private void addAnimal(Animals animal) {
-    	if (checkLocation(animal.getLocation())) {
-			String animalName = animal.getName();
-			if (animal instanceof Horse) {
-				Horse h = (Horse) animal;
-				animalName = h.getVariant().name();
-			}
-			animalName = animalName.toLowerCase();
-
-			if (animalsCollected.contains(animalName) == false) {
-				if(animalsToCollect.contains(animalName)) {
-					animalsCollected.add(animalName);
+		if(updateItemsOnChestClosed) {
+			// Cancel method if not a chest
+			if(!(event.getInventory().getHolder() instanceof Chest)) return;
+			Chest chest = (Chest)event.getInventory().getHolder();
+			if(checkLocation(chest.getLocation())) {
+				if(!chests.contains(chest)) {
+					chests.add(chest);
 				}
+				refreshItems(chest);
 			}
 		}
 	}
+	
+	@EventHandler
+	public void onEntityDamage(EntityDamageEvent e) {
+		// recount ?
+	}
 
+	@EventHandler
+	public void onPlayerInteract(PlayerInteractEvent e) {
+		
+		if (!(e.getAction() == Action.RIGHT_CLICK_BLOCK))
+			return;
+		
+		if (e.getClickedBlock().getState() instanceof Animals) {
+			if(updateAnimalsOnAnimalFeed) {
+				Animals a = (Animals) e.getClickedBlock().getState();
+				addAnimal(a, true);
+				updateAllSigns();
+			}
+		}
+		
+		if (e.getClickedBlock().getState() instanceof Sign) {
+			Sign sign = (Sign) e.getClickedBlock().getState();
+			updateSign(sign);
+		}
+	}
+	
 	@EventHandler
     public void onSignChange(SignChangeEvent e) {
     	Sign s = (Sign) e.getBlock().getState();
     	updateSign(s);
+    }
+
+    private void addAnimal(Animals animal, Boolean annonceIfNew) {
+    	if (checkLocation(animal.getLocation())) {
+			String animalName = getAnimalName(animal);
+			if (animalsCollected.contains(animalName) == false) {
+				if(animalsToCollect.contains(animalName)) {
+					animalsCollected.add(animalName);
+					if(annonceNewAnimals && annonceIfNew) {
+						String displayName = ItemNames.getAnimalDisplayName(animalName);
+						String msg = getMessage(annonceNewAnimalsMessage, displayName);
+						Bukkit.getServer().broadcastMessage(msg);
+					}
+				}
+			}
+		}
+	}
+    
+    private String getAnimalName(Animals animal) {
+    	String animalName = animal.getName();
+		if (animal instanceof Horse) {
+			Horse h = (Horse) animal;
+			animalName = h.getVariant().name();
+		}
+		animalName = animalName.toLowerCase();
+		return animalName;
     }
     
     private boolean checkLocation(Location block) {
@@ -251,7 +348,18 @@ public class ItemCollector extends JavaPlugin implements Listener {
     	return false;
     }
     
-    
+    private void updateAllSigns() {
+    	if(collectItems) {
+        	for(Sign sign : signsItems) {
+        		updateSign(sign);
+        	}
+    	}
+    	if(collectAnimals) {
+        	for(Sign sign : signsAnimals) {
+        		updateSign(sign);
+        	}
+    	}
+    }
 	private void updateSign(Sign sign) {
 		if (checkLocation(sign.getLocation())) {
 			int nbCollected = 0;
@@ -278,45 +386,161 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-
-		if (sender instanceof Player) {
-			Player player = (Player) sender;
-			if (!player.hasPermission("itemcollector")) {
-				sender.sendMessage(ChatColor.RED + "You are not permitted to do this!");
-				return true;
-			}
-
-			if (cmd.getName().equalsIgnoreCase("itemcollector")) {
-				player.sendMessage(ChatColor.AQUA + "It Works from player too !! " + ChatColor.RED + player.getName());
-
-				getConfig().set("message", "new message");
-				saveConfig();
-			}
-		}
-		else {
-			// console command
-			if (cmd.getName().equalsIgnoreCase("itemcollector")) {
-				if(args.length == 1 && args[0].equalsIgnoreCase("count")) {
-					if(collectAnimals) {
-						int nbCollected = animalsCollected.size();
-						int nbCollection = animalsToCollect.size();
-						sender.sendMessage(ChatColor.DARK_GREEN + "Animals: " + ChatColor.RED + " " + nbCollected + "/" + nbCollection);
-					}	
-					if(collectItems) {
-						int nbCollected = itemsCollected.size();
-						int nbCollection = itemsToCollect.size();
-						sender.sendMessage(ChatColor.DARK_GREEN + "Items: " + ChatColor.RED + " " + nbCollected + "/" + nbCollection);
-					}	
-					if(!collectAnimals && !collectItems) {
-						sender.sendMessage(ChatColor.RED + "Nothing to collect.  Turn ON items collection or animals collection");
-					}
+		
+		if (cmd.getName().equalsIgnoreCase("itemcollector")) {
+			
+			if (sender instanceof Player) {
+				Player player = (Player) sender;
+				if (!player.hasPermission("itemcollector")) {
+					sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+					return true;
 				}
 			}
-			return true;
+			
+			if(args.length == 2 && args[0].equalsIgnoreCase("list") && args[1].equalsIgnoreCase("animals")) {
+				listAnimals(sender);
+			}
+			else if(args.length == 2 && args[0].equalsIgnoreCase("list") && args[1].equalsIgnoreCase("items")) {
+				listItems(sender);
+			}
+			else if(args.length == 1 && args[0].equalsIgnoreCase("count")) {
+				if(collectAnimals) {
+					String msg = getMessage(annonceInventoryAnimalsOnPlayerJoinMessage, "");
+					sender.sendMessage(msg);
+				}	
+				if(collectItems) {
+					String msg = getMessage(annonceInventoryItemsOnPlayerJoinMessage, "");
+					sender.sendMessage(msg);
+				}	
+				if(!collectAnimals && !collectItems) {
+					sender.sendMessage(messagePrefix + ChatColor.RED + "Nothing to collect.  Turn ON items collection or animals collection");
+				}
+			}
+			else if(args.length == 2 && args[0].equalsIgnoreCase("refresh") && args[1].equalsIgnoreCase("animals")) {
+				if (sender instanceof Player) {
+					Player player = (Player) sender;
+					if (!player.hasPermission("itemcollector.refresh")) {
+						sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+						return true;
+					}
+				}
+				refreshAnimals();
+				sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Animals refreshed");
+				return true;
+			}
+			else if(args.length == 2 && args[0].equalsIgnoreCase("refresh") && args[1].equalsIgnoreCase("items")) {
+				if (sender instanceof Player) {
+					Player player = (Player) sender;
+					if (!player.hasPermission("itemcollector.refresh")) {
+						sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+						return true;
+					}
+				}
+				refreshItems(null);
+				sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Items refreshed");
+				return true;
+			}
+			else if(args.length == 3 && args[0].equalsIgnoreCase("add") && args[1].equalsIgnoreCase("animal")) {
+				if (sender instanceof Player) {
+					Player player = (Player) sender;
+					if (!player.hasPermission("itemcollector.add.animal")) {
+						sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+						return true;
+					}
+				}
+				if(animalsToCollect.contains(args[2])) {
+					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "This animal is already collected");
+				}
+				else {
+					animalsToCollect.add(args[2]);
+					saveNewConfig();
+					refreshAnimals();
+					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Animal added");
+				}
+				return true;
+			}
+			else if(args.length == 3 && args[0].equalsIgnoreCase("add") && args[1].equalsIgnoreCase("item")) {
+				if (sender instanceof Player) {
+					Player player = (Player) sender;
+					if (!player.hasPermission("itemcollector.add.item")) {
+						sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+						return true;
+					}
+				}
+				if(itemsToCollect.contains(args[2])) {
+					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "This item is already collected");
+				}
+				else {
+					itemsToCollect.add(args[2]);
+					saveNewConfig();
+					refreshItems(null);
+					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Item added");
+				}
+
+				return true;
+			}
+			else if(args.length == 3 && args[0].equalsIgnoreCase("remove") && args[1].equalsIgnoreCase("animal")) {
+				if (sender instanceof Player) {
+					Player player = (Player) sender;
+					if (!player.hasPermission("itemcollector.remove.animal")) {
+						sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+						return true;
+					}
+				}
+				if(animalsToCollect.contains(args[2])) {
+					animalsToCollect.remove(args[2]);
+					saveNewConfig();
+					refreshAnimals();
+					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Animal removed");
+				}
+				else {
+					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "This animal not currently collected");
+				}
+				return true;
+			}
+			else if(args.length == 3 && args[0].equalsIgnoreCase("remove") && args[1].equalsIgnoreCase("item")) {
+				if (sender instanceof Player) {
+					Player player = (Player) sender;
+					if (!player.hasPermission("itemcollector.remove.item")) {
+						sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+						return true;
+					}
+				}
+				if(itemsToCollect.contains(args[2])) {
+					itemsToCollect.remove(args[2]);
+					saveNewConfig();
+					refreshItems(null);
+					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Item removed");
+				}
+				else {
+					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "This item not currently collected");
+				}
+
+				return true;
+			}
+			else if(args.length == 6 && args[0].equalsIgnoreCase("set") && args[1].equalsIgnoreCase("region")) {
+				if (sender instanceof Player) {
+					Player player = (Player) sender;
+					if (!player.hasPermission("itemcollector.set.region")) {
+						sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+						return true;
+					}
+				}
+				minX = Integer.parseInt(args[2]);
+				maxX = Integer.parseInt(args[3]);
+				minZ = Integer.parseInt(args[4]);
+				maxZ = Integer.parseInt(args[5]);
+				saveNewConfig();
+				refreshItems(null);
+				refreshAnimals();
+				sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Region modified");
+				return true;
+			}
+			else {
+				sender.sendMessage(messagePrefix + ChatColor.RED + "Unknowd command or parameter count.");
+			}
 		}
-
 		return true;
-
 	}
 
 	private void getChestsAndSigns() {
@@ -326,6 +550,10 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		int maxXChunck = maxX / 16;
 		int minZChunck = minZ / 16;
 		int maxZChunck = maxZ / 16;
+		
+		chests.clear();
+		signsAnimals.clear();
+		signsItems.clear();
 
 		for (int x = minXChunck; x <= maxXChunck; x++) {
 			for (int z = minZChunck; z <= maxZChunck; z++) {
@@ -355,11 +583,12 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	
 	private void refreshCollections() {
 		refreshAnimals();
-		refreshItems();	
+		refreshItems(null);	
 	}
 	
 	private void refreshAnimals() {
 		if (collectAnimals) {
+			getChestsAndSigns();
 			animalsCollected.clear();
 			
 			World world = getServer().getWorld("world");
@@ -376,38 +605,82 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 					for (Entity entity : chunk.getEntities()) {
 						if(entity instanceof Animals) {
-							Animals a = (Animals)entity;
-							addAnimal(a);
+							Animals animal = (Animals)entity;
+							addAnimal(animal, false);
 						}
 					}
 				}
+			}
+			updateAllSigns();
+		}
+	}
+	
+	private void refreshItems(Chest newChest) {
+		if (collectItems) {
+			getChestsAndSigns();
+			HashSet<String> oldItems = new HashSet<String>();
+			oldItems.addAll(itemsCollected);
+			itemsCollected.clear();
+			for(Chest chest : chests) {
+
+					for (ItemStack items : chest.getInventory().getContents()) {
+						if (items != null) {
+							int id = items.getTypeId();
+							
+							short variant = items.getDurability();
+							
+							String itemId = id + "";
+							if(variant != 0) {
+								itemId = id + ":" + variant;
+							}
+							
+							if(itemsToCollect.contains(itemId)) {
+								if(annonceNewItems && chest == newChest && !oldItems.contains(itemId)) {
+									String displayName = ItemNames.getBlockDisplayName(itemId);
+								    Bukkit.getServer().broadcastMessage(getMessage(annonceNewItemsMessage, displayName));
+									oldItems.add(itemId);
+								}
+								itemsCollected.add(itemId);
+							}
+						}
+					}
+
+			}
+			updateAllSigns();
+		}
+	}
+	
+	private void listAnimals(CommandSender sender) {
+		for(String s : animalsToCollect) {
+			String displayName = ItemNames.getAnimalDisplayName(s);
+			if(animalsCollected.contains(s)) {
+				sender.sendMessage(ChatColor.GREEN + displayName);
+			}else {
+				sender.sendMessage(ChatColor.RED + displayName);
 			}
 		}
 	}
 	
-	private void refreshItems() {
-		if (collectItems) {
-			itemsCollected.clear();
-			for(Chest chest : chests) {
-				for (ItemStack items : chest.getInventory().getContents()) {
-					if (items != null) {
-						int id = items.getTypeId();
-						
-						Material mat = items.getType();
-						short variant = items.getDurability();
-
-						String bukkitName = mat.name();										
-						
-						String displayName = ItemNames.valueOf(bukkitName).toString();
-						
-						if(items.getData() instanceof Wool) {
-							Wool w = (Wool)items.getData();
-							String variantPrefix = w.getColor().name();
-						}
-						
-					}
-				}
+	private void listItems(CommandSender sender) {
+		for (String s : itemsToCollect) {
+			String displayName = ItemNames.getBlockDisplayName(s);
+			if (itemsCollected.contains(s)) {
+				sender.sendMessage(ChatColor.GREEN + displayName);
+			} else {
+				sender.sendMessage(ChatColor.RED + displayName);
 			}
 		}
+	}
+	
+	private String getMessage(String message, String displayName) {
+		return messagePrefix + 
+				message
+				.replace("<itemName>", displayName)
+				.replace("<animalName>", displayName)
+				.replace("<nbCollectedItems>", itemsCollected.size() + "")
+				.replace("<nbTotalItems>", itemsToCollect.size() + "")
+				.replace("<nbCollectedAnimals>", animalsCollected.size() + "")
+				.replace("<nbTotalAnimals>", animalsToCollect.size() + "")
+		;
 	}
 }
