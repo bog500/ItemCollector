@@ -441,7 +441,7 @@ public String toString() {
 
 private static final Map<String, ItemNames> lookup = new HashMap<String, ItemNames>();
 
-public static String getAnimalDisplayName(String key) {
+public static String getCreatureDisplayName(String key) {
 	String value = "";
 	try {
 		value = ItemNames.valueOf(key.toUpperCase()).firstUpperCased();
