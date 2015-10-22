@@ -1,6 +1,7 @@
 package mc.itemcollector;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -298,7 +299,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	}
 
 	@EventHandler
-	public void ontSignChanged(SignChangeEvent e) {
+	public void onSignChanged(SignChangeEvent e) {
 		if (e.getLine(0).equalsIgnoreCase("[Items]") || e.getLine(0).equalsIgnoreCase("[Creatures]")) {
 			Sign sign = (Sign) e.getBlock().getState();
 			sign.setLine(0, e.getLine(0));
@@ -672,24 +673,34 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	}
 
 	private void listCreatures(CommandSender sender) {
+		List<String> messages = new ArrayList<String>();
 		for (String s : creaturesToCollect) {
 			String displayName = ItemNames.getCreatureDisplayName(s);
 			if (creaturesCollected.contains(s)) {
-				sender.sendMessage(ChatColor.GREEN + displayName);
+				messages.add(ChatColor.GREEN + displayName);
 			} else {
-				sender.sendMessage(ChatColor.RED + displayName);
+				messages.add(ChatColor.RED + displayName);
 			}
+		}
+		Collections.sort(messages);
+		for(String msg : messages) {
+			sender.sendMessage(msg);
 		}
 	}
 
 	private void listItems(CommandSender sender) {
+		List<String> messages = new ArrayList<String>();
 		for (String s : itemsToCollect) {
 			String displayName = ItemNames.getBlockDisplayName(s);
 			if (itemsCollected.contains(s)) {
-				sender.sendMessage(ChatColor.GREEN + displayName);
+				messages.add(ChatColor.GREEN + displayName);
 			} else {
-				sender.sendMessage(ChatColor.RED + displayName);
+				messages.add(ChatColor.RED + displayName);
 			}
+		}
+		Collections.sort(messages);
+		for(String msg : messages) {
+			sender.sendMessage(msg);
 		}
 	}
 
