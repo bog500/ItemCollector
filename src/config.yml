@@ -1,8 +1,8 @@
-minX: -100
-minZ: -100
-maxX: 100
-maxZ: 100
-worldName: "world"
+minX: 48
+minZ: 32
+maxX: 80
+maxZ: 64
+worldName: world
 collectAnimals: true
 collectItems: true
 annonceInventoryItemsOnPlayerJoin: true
@@ -22,7 +22,19 @@ itemsCollection:
 - '1': true
   '1:1': true
   '1:2': true
+  '1:3': true
+  '1:4': true
+  '1:5': true
+  '1:6': true
+  '2': true
+  '3': true
+  '3:1': true
+  '3:2': true
+  '4': true
+  '5:1': true
+  '5:2': true
 animalsCollection:
-- Rabbit: true
-  Cow: true
-  Pig: true
+- rabbit: true
+  skeleton_horse: true
+  cow: true
+  pig: true
