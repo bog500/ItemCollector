@@ -745,7 +745,7 @@ itemsCollection:
   '2267': true
 
 # List of animals that players will try to collect
-animalsCollection:
+creaturesCollection:
 - chicken: true
   cow: true
   donkey: true

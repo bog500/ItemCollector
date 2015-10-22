@@ -156,7 +156,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		creaturesCollection.add(Creatures);
 
 		config.set("itemsCollection", itemsCollection);
-		config.set("CreaturesCollection", creaturesCollection);
+		config.set("creaturesCollection", creaturesCollection);
 
 		config.options().copyDefaults(true);
 		saveConfig();
@@ -209,7 +209,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		creaturesCollection.add(Creatures);
 
 		config.addDefault("itemsCollection", itemsCollection);
-		config.addDefault("CreaturesCollection", creaturesCollection);
+		config.addDefault("creaturesCollection", creaturesCollection);
 
 		config.options().copyDefaults(true);
 		saveConfig();
@@ -243,7 +243,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		annonceNewCreaturesMessage = config.getString("annonceNewCreaturesMessage");
 
 		itemsCollection = config.getMapList("itemsCollection");
-		creaturesCollection = config.getMapList("CreaturesCollection");
+		creaturesCollection = config.getMapList("creaturesCollection");
 
 		for (Map.Entry<?, ?> entry : itemsCollection.get(0).entrySet()) {
 			String key = entry.getKey().toString().toLowerCase();
