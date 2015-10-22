@@ -2,6 +2,7 @@ minX: -100
 minZ: -100
 maxX: 100
 maxZ: 100
+worldName: "world"
 collectAnimals: true
 collectItems: true
 annonceInventoryItemsOnPlayerJoin: true

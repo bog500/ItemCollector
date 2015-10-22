@@ -299,7 +299,7 @@ public enum ItemNames {
 	STAINED_GLASS("stained glass"), 
 	STAINED_GLASS_PANE("stained glass pane"), 
 	STATIONARY_LAVA("stationary lava"), 
-	STEP("slab"), 
+	STEP("stone slab"), 
 	STICK("stick"), 
 	STONE("stone"), 
 	STONE_AXE("stone axe"), 
@@ -330,7 +330,7 @@ public enum ItemNames {
 	WATER_LILY("lily pad"), 
 	WEB("cobweb"), 
 	WHEAT("wheat"), 
-	WOOD("wood"), 
+	WOOD("wood planks"), 
 	WOOD_AXE("wooden axe"), 
 	WOOD_BUTTON("button"), 
 	WOOD_DOOR("wooden door"), 
@@ -393,6 +393,20 @@ public enum ItemNames {
 	LEAVES_2__0("acadia leaves"),
 	LEAVES_2__1("dark oak leaves"),
 	
+	STEP__0("stone slab"),
+	STEP__1("sandstone slab"),
+	STEP__2("wooden slab"),
+	STEP__3("cobblestone slab"),
+	STEP__4("brick slab"),
+	STEP__5("stone brick slab"),
+	STEP__6("nether brick slab"),
+	STEP__7("quartz brick slab"),
+	
+	RED_SANDSTONE("red sandstone"),
+	RED_SANDSTONE__0("red sandstone"),
+	RED_SANDSTONE__1("red sandstone chiseled"),
+	RED_SANDSTONE__2("red sandstone smooth"),
+	
 	// ######## ENTITIES ########
 	
 	SNOWMAN("snow golem"),
@@ -428,21 +442,25 @@ public String toString() {
 private static final Map<String, ItemNames> lookup = new HashMap<String, ItemNames>();
 
 public static String getAnimalDisplayName(String key) {
+	String value = "";
 	try {
-		return ItemNames.valueOf(key.toUpperCase()).firstUpperCased();
+		value = ItemNames.valueOf(key.toUpperCase()).firstUpperCased();
 	}catch(Exception ex) {
-		return key;
+		value = key;
 	}
+	return value.replace('_', ' ');
 }
 
 public static String getBlockDisplayName(String key) {
+	String bukkitName = "";
+	String value = "";
 	try {
 		
 		String[] splitted = key.split(":");
 		int id = Integer.parseInt(splitted[0]);
 		int variant = -1;
 		ItemStack is;
-		String bukkitName;	
+			
 		if(splitted.length == 2) {
 			variant = Integer.parseInt(splitted[1]);
 			is = new ItemStack(id, 1, (short)variant);
@@ -453,11 +471,15 @@ public static String getBlockDisplayName(String key) {
 			Material mat = is.getType();
 			bukkitName = mat.name();	
 		}
-		
-		return ItemNames.valueOf(key.toUpperCase()).firstUpperCased();
+		value = ItemNames.valueOf(bukkitName.toUpperCase()).firstUpperCased();
 	}catch(Exception ex) {
-		return key;
+		if(bukkitName != "" && bukkitName != null) {
+			value = bukkitName;
+		}else {
+			value = key;
+		}
 	}
+	return value.replace('_', ' ');
 }
 
 // Returns the Material name from the given block name

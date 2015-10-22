@@ -43,6 +43,8 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	private int maxX = 100;
 	private int maxZ = 100;
 	
+	private String worldName = "world";
+	
 	private boolean collectAnimals = true;
 	private boolean collectItems = true;
 	
@@ -77,7 +79,6 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	public void onEnable() {
 		settings.setup(this);
 		
-		// Bukkit.getServer().broadcastMessage
 		Bukkit.getServer().getLogger().info("ItemCollector Enabled!");
 		//setDefaultConfig();
 		getSavedConfig();
@@ -98,6 +99,8 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	    config.set("minZ", minZ);
 	    config.set("maxX", maxX);
 	    config.set("maxZ", maxZ);
+	    
+	    config.set("worldName", worldName);
 	    
 	    config.set("collectAnimals", collectAnimals);
 	    config.set("collectItems", collectItems);
@@ -162,9 +165,11 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	    config.addDefault("maxX", maxX);
 	    config.addDefault("maxZ", maxZ);
 	    
+	    config.addDefault("worldName", worldName);
+	    
 	    config.addDefault("collectAnimals", collectAnimals);
 	    config.addDefault("collectItems", collectItems);
-	    	    
+	        
 	    config.addDefault("annonceInventoryItemsOnPlayerJoin", annonceInventoryItemsOnPlayerJoin);
 	    config.addDefault("annonceInventoryAnimalsOnPlayerJoin", annonceInventoryAnimalsOnPlayerJoin);
 	    
@@ -211,6 +216,8 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	    minZ = config.getInt("minZ");
 	    maxX = config.getInt("maxX");
 	    maxZ = config.getInt("maxZ");
+	    
+	    worldName = config.getString("worldName");
 	    
 	    collectAnimals = config.getBoolean("collectAnimals");
 	    collectItems = config.getBoolean("collectItems");
@@ -285,17 +292,29 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	}
 	
 	@EventHandler
+    public void ontSignChanged(SignChangeEvent e) {
+		if(e.getLine(0).equalsIgnoreCase("[Items]")
+				|| e.getLine(0).equalsIgnoreCase("[Animals]")) {
+			Sign sign = (Sign) e.getBlock().getState();
+			sign.setLine(0, e.getLine(0));
+			sign.update();
+			updateSign(sign);
+		}
+    }
+	
+	@EventHandler
 	public void onEntityDamage(EntityDamageEvent e) {
 		// recount ?
 	}
 
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent e) {
-		
+				
 		if (!(e.getAction() == Action.RIGHT_CLICK_BLOCK))
 			return;
-		
+				
 		if (e.getClickedBlock().getState() instanceof Animals) {
+			broadcastMessage("interact animal");
 			if(updateAnimalsOnAnimalFeed) {
 				Animals a = (Animals) e.getClickedBlock().getState();
 				addAnimal(a, true);
@@ -324,14 +343,14 @@ public class ItemCollector extends JavaPlugin implements Listener {
 					if(annonceNewAnimals && annonceIfNew) {
 						String displayName = ItemNames.getAnimalDisplayName(animalName);
 						String msg = getMessage(annonceNewAnimalsMessage, displayName);
-						Bukkit.getServer().broadcastMessage(msg);
+						broadcastMessage(msg);
 					}
 				}
 			}
 		}
 	}
     
-    private String getAnimalName(Animals animal) {
+	private String getAnimalName(Animals animal) {
     	String animalName = animal.getName();
 		if (animal instanceof Horse) {
 			Horse h = (Horse) animal;
@@ -361,26 +380,35 @@ public class ItemCollector extends JavaPlugin implements Listener {
     	}
     }
 	private void updateSign(Sign sign) {
+
 		if (checkLocation(sign.getLocation())) {
 			int nbCollected = 0;
 			int nbCollection = 0;
+			boolean updateSign = false;
 			if (sign.getLine(0).equalsIgnoreCase("[Animals]")) {
 				if (signsAnimals.contains(sign) == false) {
 					signsAnimals.add(sign);
 				}
-				sign.setLine(0, ChatColor.DARK_BLUE + "[Animals]");
-				nbCollected = itemsCollected.size();
-				nbCollection = itemsToCollect.size();
+				sign.setLine(0, "[Animals]");
+				nbCollected = animalsCollected.size();
+				nbCollection = animalsToCollect.size();
+				updateSign = true;
+				
 			} else if (sign.getLine(0).equalsIgnoreCase("[Items]")) {
 				if (signsItems.contains(sign) == false) {
 					signsItems.add(sign);
 				}
-				sign.setLine(0, ChatColor.DARK_BLUE + "[Items]");
-				nbCollected = animalsCollected.size();
-				nbCollection = animalsToCollect.size();
+				sign.setLine(0, "[Items]");
+				nbCollected = itemsCollected.size();
+				nbCollection = itemsToCollect.size();
+				updateSign = true;
 			}
-			sign.setLine(1, ChatColor.DARK_BLUE + "==========");
-			sign.setLine(2, ChatColor.RED + " " + nbCollected + "/" + nbCollection);
+			if(updateSign) {
+				sign.setLine(1, ChatColor.DARK_BLUE + "==========");
+				sign.setLine(2, ChatColor.RED + " " + nbCollected + "/" + nbCollection);
+				sign.setLine(3,  "");
+				sign.update();
+			}
 		}
 	}
 
@@ -544,7 +572,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	}
 
 	private void getChestsAndSigns() {
-		World world = getServer().getWorld("world");
+		World world = getServer().getWorld(worldName);
 
 		int minXChunck = minX / 16;
 		int maxXChunck = maxX / 16;
@@ -591,7 +619,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			getChestsAndSigns();
 			animalsCollected.clear();
 			
-			World world = getServer().getWorld("world");
+			World world = getServer().getWorld(worldName);
 
 			int minXChunck = minX / 16;
 			int maxXChunck = maxX / 16;
@@ -635,9 +663,9 @@ public class ItemCollector extends JavaPlugin implements Listener {
 							}
 							
 							if(itemsToCollect.contains(itemId)) {
-								if(annonceNewItems && chest == newChest && !oldItems.contains(itemId)) {
+								if(annonceNewItems && sameLocation(chest, newChest) && !oldItems.contains(itemId)) {
 									String displayName = ItemNames.getBlockDisplayName(itemId);
-								    Bukkit.getServer().broadcastMessage(getMessage(annonceNewItemsMessage, displayName));
+								    broadcastMessage(getMessage(annonceNewItemsMessage, displayName));
 									oldItems.add(itemId);
 								}
 								itemsCollected.add(itemId);
@@ -683,4 +711,19 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				.replace("<nbTotalAnimals>", animalsToCollect.size() + "")
 		;
 	}
+	
+    private void broadcastMessage(String msg) {
+    	for(Player p : Bukkit.getServer().getOnlinePlayers()){
+    		p.sendMessage(msg);
+		}
+	}
+    
+    private boolean sameLocation(BlockState block1, BlockState block2) {
+    	if(block1 == null || block2 == null) {
+    		return false;
+    	}
+    	return block1.getX() == block2.getX()
+    			&& block1.getY() == block2.getY()
+    			&& block1.getZ() == block2.getZ();
+    }
 }
