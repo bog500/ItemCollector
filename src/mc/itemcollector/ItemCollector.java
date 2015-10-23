@@ -28,6 +28,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
@@ -84,7 +85,6 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 		settings.setup(this);
-
 		Bukkit.getServer().getLogger().info("ItemCollector Enabled!");
 		// setDefaultConfig();
 		getSavedConfig();
@@ -313,20 +313,27 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		// recount ?
 	}
 
+	public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
+
+		if (updateCreaturesOnCreatureFeed) {
+			Entity entity = e.getRightClicked();
+			if (entity == null)
+				return;
+
+			if (entity instanceof Creature) {
+				broadcastMessage("interact Creature");
+				Creature a = (Creature) entity;
+				addCreature(a, true);
+				updateAllSigns();
+			}
+		}
+	}
+	
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent e) {
 
 		if (!(e.getAction() == Action.RIGHT_CLICK_BLOCK))
 			return;
-
-		if (e.getClickedBlock().getState() instanceof Creature) {
-			broadcastMessage("interact Creature");
-			if (updateCreaturesOnCreatureFeed) {
-				Creature a = (Creature) e.getClickedBlock().getState();
-				addCreature(a, true);
-				updateAllSigns();
-			}
-		}
 
 		if (e.getClickedBlock().getState() instanceof Sign) {
 			Sign sign = (Sign) e.getClickedBlock().getState();
@@ -587,35 +594,35 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				
 			}
 			switch(args[2].toLowerCase()) {
-			case "collectCreatures":
+			case "collectcreatures":
 				collectCreatures = value;
 				break;
 				
-			case "collectItems":
+			case "collectitems":
 				collectItems = value;
 				break;
 				
-			case "annonceInventoryItemsOnPlayerJoin":
+			case "annonceinventoryitemsonplayerjoin":
 				annonceInventoryItemsOnPlayerJoin = value;
 				break;
 				
-			case "annonceInventoryCreaturesOnPlayerJoin":
+			case "annonceinventorycreaturesonplayerjoin":
 				annonceInventoryCreaturesOnPlayerJoin = value;
 				break;
 				
-			case "annonceNewItems":
+			case "annoncenewitems":
 				annonceNewItems = value;
 				break;
 				
-			case "annonceNewCreatures":
+			case "annoncenewcreatures":
 				annonceNewCreatures = value;
 				break;
 				
-			case "updateItemsOnChestClosed":
+			case "updateitemsonchestclosed":
 				updateItemsOnChestClosed = value;
 				break;
 				
-			case "updateCreaturesOnCreatureFeed":
+			case "updatecreaturesoncreaturefeed":
 				updateCreaturesOnCreatureFeed = value;
 				break;
 				
@@ -642,19 +649,19 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				messagePrefix = newMsg;
 				break;
 				
-			case "annonceInventoryItemsOnPlayerJoinMessage":
+			case "annonceinventoryitemsonplayerjoinmessage":
 				annonceInventoryItemsOnPlayerJoinMessage = newMsg;
 				break;
 				
-			case "annonceInventoryCreaturesOnPlayerJoinMessage":
+			case "annonceinventorycreaturesonplayerjoinmessage":
 				annonceInventoryCreaturesOnPlayerJoinMessage = newMsg;
 				break;
 				
-			case "annonceNewItemsMessage":
+			case "annoncenewitemsmessage":
 				annonceNewItemsMessage = newMsg;
 				break;
 				
-			case "annonceNewCreaturesMessage":
+			case "annoncenewcreaturesmessage":
 				annonceNewCreaturesMessage = newMsg;
 				break;
 								
