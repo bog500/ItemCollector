@@ -419,62 +419,71 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		}
 	}
 
-	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-
-		if (cmd.getName().equalsIgnoreCase("itemcollector")) {
-
-			if (sender instanceof Player) {
-				Player player = (Player) sender;
-				if (!player.hasPermission("itemcollector")) {
-					sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
-					return true;
-				}
+	private boolean listCommand(CommandSender sender, String[] args) {
+		if(args.length == 3) {
+			ListType listType = ListType.getListType(args[2]);
+			if (args[1].equalsIgnoreCase("creatures")) {
+				listCreatures(sender, listType);
+				return true;
+			} else if (args[1].equalsIgnoreCase("items")) {
+				listItems(sender, listType);
+				return true;
 			}
-
-			if (args.length == 2 && args[0].equalsIgnoreCase("list") && args[1].equalsIgnoreCase("Creatures")) {
-				listCreatures(sender);
-			} else if (args.length == 2 && args[0].equalsIgnoreCase("list") && args[1].equalsIgnoreCase("items")) {
-				listItems(sender);
-			} else if (args.length == 1 && args[0].equalsIgnoreCase("count")) {
-				if (collectCreatures) {
-					String msg = getMessage(annonceInventoryCreaturesOnPlayerJoinMessage, "");
-					sender.sendMessage(msg);
-				}
-				if (collectItems) {
-					String msg = getMessage(annonceInventoryItemsOnPlayerJoinMessage, "");
-					sender.sendMessage(msg);
-				}
-				if (!collectCreatures && !collectItems) {
-					sender.sendMessage(messagePrefix + ChatColor.RED
-							+ "Nothing to collect.  Turn ON items collection or Creatures collection");
-				}
-			} else if (args.length == 2 && args[0].equalsIgnoreCase("refresh") && args[1].equalsIgnoreCase("Creatures")) {
-				if (sender instanceof Player) {
-					Player player = (Player) sender;
-					if (!player.hasPermission("itemcollector.refresh")) {
-						sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
-						return true;
-					}
-				}
+		}
+		return false;
+	}
+	
+	private boolean refreshCommand(CommandSender sender, String[] args) {
+		if (sender instanceof Player) {
+			Player player = (Player) sender;
+			if (!player.hasPermission("itemcollector.refresh")) {
+				sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+				return true;
+			}
+		}
+		if (args.length == 2) {
+			if (args[1].equalsIgnoreCase("creatures")) {
 				refreshCreatures();
 				sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Creatures refreshed");
 				return true;
-			} else if (args.length == 2 && args[0].equalsIgnoreCase("refresh") && args[1].equalsIgnoreCase("items")) {
-				if (sender instanceof Player) {
-					Player player = (Player) sender;
-					if (!player.hasPermission("itemcollector.refresh")) {
-						sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
-						return true;
-					}
-				}
+			} else if (args[1].equalsIgnoreCase("items")) {
 				refreshItems(null);
 				sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Items refreshed");
 				return true;
-			} else if (args.length == 3 && args[0].equalsIgnoreCase("add") && args[1].equalsIgnoreCase("Creature")) {
+			}
+		}
+		return false;
+	}
+
+	private boolean countCommand(CommandSender sender, String[] args) {
+		if (sender instanceof Player) {
+			Player player = (Player) sender;
+			if (!player.hasPermission("itemcollector.remove.count")) {
+				sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+				return false;
+			}
+		}
+		if (collectCreatures) {
+			String msg = getMessage(annonceInventoryCreaturesOnPlayerJoinMessage, "");
+			sender.sendMessage(msg);
+		}
+		if (collectItems) {
+			String msg = getMessage(annonceInventoryItemsOnPlayerJoinMessage, "");
+			sender.sendMessage(msg);
+		}
+		if (!collectCreatures && !collectItems) {
+			sender.sendMessage(messagePrefix + ChatColor.RED
+					+ "Nothing to collect.  Turn ON Items-collection or Creatures-collection");
+		}
+		return true;
+	}
+	
+	private boolean addCommand(CommandSender sender, String[] args) {
+		if (args.length == 3) {
+			if (args[1].equalsIgnoreCase("creature")) {
 				if (sender instanceof Player) {
 					Player player = (Player) sender;
-					if (!player.hasPermission("itemcollector.add.Creature")) {
+					if (!player.hasPermission("itemcollector.add.creature")) {
 						sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
 						return true;
 					}
@@ -488,7 +497,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Creature added");
 				}
 				return true;
-			} else if (args.length == 3 && args[0].equalsIgnoreCase("add") && args[1].equalsIgnoreCase("item")) {
+			} else if (args[1].equalsIgnoreCase("item")) {
 				if (sender instanceof Player) {
 					Player player = (Player) sender;
 					if (!player.hasPermission("itemcollector.add.item")) {
@@ -504,12 +513,18 @@ public class ItemCollector extends JavaPlugin implements Listener {
 					refreshItems(null);
 					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Item added");
 				}
-
 				return true;
-			} else if (args.length == 3 && args[0].equalsIgnoreCase("remove") && args[1].equalsIgnoreCase("Creature")) {
+			} 
+		}
+		return false;
+	}
+	
+	private boolean removeCommand(CommandSender sender, String[] args) {
+		if (args.length == 3) {
+			if (args[1].equalsIgnoreCase("creature")) {
 				if (sender instanceof Player) {
 					Player player = (Player) sender;
-					if (!player.hasPermission("itemcollector.remove.Creature")) {
+					if (!player.hasPermission("itemcollector.remove.creature")) {
 						sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
 						return true;
 					}
@@ -523,7 +538,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "This Creature not currently collected");
 				}
 				return true;
-			} else if (args.length == 3 && args[0].equalsIgnoreCase("remove") && args[1].equalsIgnoreCase("item")) {
+			} else if (args[1].equalsIgnoreCase("item")) {
 				if (sender instanceof Player) {
 					Player player = (Player) sender;
 					if (!player.hasPermission("itemcollector.remove.item")) {
@@ -539,30 +554,64 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				} else {
 					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "This item not currently collected");
 				}
-
 				return true;
-			} else if (args.length == 6 && args[0].equalsIgnoreCase("set") && args[1].equalsIgnoreCase("region")) {
-				if (sender instanceof Player) {
-					Player player = (Player) sender;
-					if (!player.hasPermission("itemcollector.set.region")) {
-						sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
-						return true;
-					}
-				}
-				minX = Integer.parseInt(args[2]);
-				maxX = Integer.parseInt(args[3]);
-				minZ = Integer.parseInt(args[4]);
-				maxZ = Integer.parseInt(args[5]);
-				saveNewConfig();
-				refreshItems(null);
-				refreshCreatures();
-				sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Region modified");
-				return true;
-			} else {
-				sender.sendMessage(messagePrefix + ChatColor.RED + "Unknowd command or parameter count.");
 			}
 		}
-		return true;
+		return false;
+	}
+	
+	private boolean setCommand(CommandSender sender, String[] args) {
+		if (args.length == 6 && args[1].equalsIgnoreCase("region")) {
+			if (sender instanceof Player) {
+				Player player = (Player) sender;
+				if (!player.hasPermission("itemcollector.set.region")) {
+					sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+					return true;
+				}
+			}
+			minX = Integer.parseInt(args[2]);
+			maxX = Integer.parseInt(args[3]);
+			minZ = Integer.parseInt(args[4]);
+			maxZ = Integer.parseInt(args[5]);
+			saveNewConfig();
+			refreshItems(null);
+			refreshCreatures();
+			sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Region modified");
+			return true;
+		} 
+		return false;
+	}
+	
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+
+		if (cmd.getName().equalsIgnoreCase("itemcollector")) {
+
+			if (sender instanceof Player) {
+				Player player = (Player) sender;
+				if (!player.hasPermission("itemcollector")) {
+					sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+					return true;
+				}
+			}
+			
+			if(args.length >= 1) {
+				if(args[0].equalsIgnoreCase("list")) {
+					return listCommand(sender, args);
+				}else if(args[0].equalsIgnoreCase("refresh")) {
+					return refreshCommand(sender, args);
+				}else if(args[0].equalsIgnoreCase("count")) {
+					return countCommand(sender, args);
+				}else if(args[0].equalsIgnoreCase("add")) {
+					return addCommand(sender, args);
+				}else if(args[0].equalsIgnoreCase("remove")) {
+					return removeCommand(sender, args);
+				}else if(args[0].equalsIgnoreCase("set")) {
+					return setCommand(sender, args);
+				}
+			}
+		}
+		return false;
 	}
 
 	private void getChestsAndSigns() {
@@ -672,13 +721,13 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		}
 	}
 
-	private void listCreatures(CommandSender sender) {
+	private void listCreatures(CommandSender sender, ListType listType) {
 		List<String> messages = new ArrayList<String>();
 		for (String s : creaturesToCollect) {
 			String displayName = ItemNames.getCreatureDisplayName(s);
-			if (creaturesCollected.contains(s)) {
+			if ((listType == ListType.ALL || listType == ListType.COLLECTED) && creaturesCollected.contains(s)) {
 				messages.add(ChatColor.GREEN + displayName);
-			} else {
+			} else if ((listType == ListType.ALL || listType == ListType.MISSING) && !creaturesCollected.contains(s)) {
 				messages.add(ChatColor.RED + displayName);
 			}
 		}
@@ -688,13 +737,13 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		}
 	}
 
-	private void listItems(CommandSender sender) {
+	private void listItems(CommandSender sender, ListType listType) {
 		List<String> messages = new ArrayList<String>();
 		for (String s : itemsToCollect) {
 			String displayName = ItemNames.getBlockDisplayName(s);
-			if (itemsCollected.contains(s)) {
+			if ((listType == ListType.ALL || listType == ListType.COLLECTED) && itemsCollected.contains(s)) {
 				messages.add(ChatColor.GREEN + displayName);
-			} else {
+			} else if ((listType == ListType.ALL || listType == ListType.MISSING) && !itemsCollected.contains(s)) {
 				messages.add(ChatColor.RED + displayName);
 			}
 		}
