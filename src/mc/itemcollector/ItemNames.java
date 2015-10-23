@@ -630,7 +630,7 @@ public enum ItemNames {
 	
 	SPONGE("sponge"), 
 	SPONGE__0("sponge"), 
-	SPONGE__1("wet sponge"), 
+	SPONGE__1("wet sponge"),
 	
 	// ######## ENTITIES ########
 	
