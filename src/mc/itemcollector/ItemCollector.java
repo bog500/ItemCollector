@@ -579,6 +579,93 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Region modified");
 			return true;
 		} 
+		else if (args.length == 4 && args[1].equalsIgnoreCase("option")) {
+			boolean value = false;
+			try  {
+				value = Boolean.getBoolean(args[3]);
+			}catch(Exception ex) {
+				
+			}
+			switch(args[2].toLowerCase()) {
+			case "collectCreatures":
+				collectCreatures = value;
+				break;
+				
+			case "collectItems":
+				collectItems = value;
+				break;
+				
+			case "annonceInventoryItemsOnPlayerJoin":
+				annonceInventoryItemsOnPlayerJoin = value;
+				break;
+				
+			case "annonceInventoryCreaturesOnPlayerJoin":
+				annonceInventoryCreaturesOnPlayerJoin = value;
+				break;
+				
+			case "annonceNewItems":
+				annonceNewItems = value;
+				break;
+				
+			case "annonceNewCreatures":
+				annonceNewCreatures = value;
+				break;
+				
+			case "updateItemsOnChestClosed":
+				updateItemsOnChestClosed = value;
+				break;
+				
+			case "updateCreaturesOnCreatureFeed":
+				updateCreaturesOnCreatureFeed = value;
+				break;
+				
+			default:
+				sender.sendMessage(messagePrefix + ChatColor.RED + "Invalid parameter '" + args[2].toLowerCase() + "'");
+				return false;
+			}
+			sender.sendMessage(messagePrefix + ChatColor.DARK_PURPLE  + args[2] + ChatColor.GRAY + " set to " + ChatColor.GREEN + Boolean.toString(value));
+			saveNewConfig();
+			return true;
+		}
+		else if (args.length == 4 && args[1].equalsIgnoreCase("world")) {
+			worldName = args[2];
+			sender.sendMessage(messagePrefix + "World set to " + ChatColor.GREEN + worldName);
+			saveNewConfig();
+			refreshItems(null);
+			refreshCreatures();
+			return true;
+		}
+		else if (args.length == 4 && args[1].equalsIgnoreCase("message")) {
+			String newMsg = args[3];
+			switch(args[2].toLowerCase()) {
+			case "messagePrefix":
+				messagePrefix = newMsg;
+				break;
+				
+			case "annonceInventoryItemsOnPlayerJoinMessage":
+				annonceInventoryItemsOnPlayerJoinMessage = newMsg;
+				break;
+				
+			case "annonceInventoryCreaturesOnPlayerJoinMessage":
+				annonceInventoryCreaturesOnPlayerJoinMessage = newMsg;
+				break;
+				
+			case "annonceNewItemsMessage":
+				annonceNewItemsMessage = newMsg;
+				break;
+				
+			case "annonceNewCreaturesMessage":
+				annonceNewCreaturesMessage = newMsg;
+				break;
+								
+			default:
+				sender.sendMessage(messagePrefix + ChatColor.RED + "Invalid parameter '" + args[2].toLowerCase() + "'");
+				return false;
+			}
+			sender.sendMessage(messagePrefix + ChatColor.DARK_PURPLE  + args[2] + ChatColor.GRAY + " was " + ChatColor.GREEN + "changed");
+			saveNewConfig();
+			return true;
+		}
 		return false;
 	}
 	
