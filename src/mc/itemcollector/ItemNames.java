@@ -634,7 +634,8 @@ public enum ItemNames {
 	
 	// ######## ENTITIES ########
 	
-	SNOWMAN("snow golem"),
+	SNOWMAN("snow golem (snowman)"),
+	SNOW_GOLEM("snow golem"),
 	OCELOT("ocelot"),
 	IRON_GOLEM("iron golem"),
 	RABBIT("rabbit"),

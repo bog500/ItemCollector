@@ -369,12 +369,14 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 	private void addCreature(Creature Creature, Boolean annonceIfNew) {
 		if (checkLocation(Creature.getLocation())) {
-			String CreatureName = getCreatureName(Creature);
-			if (creaturesCollected.contains(CreatureName) == false) {
-				if (creaturesToCollect.contains(CreatureName)) {
-					creaturesCollected.add(CreatureName);
+			String creatureName = getCreatureName(Creature).toLowerCase().replace(" ", "_");
+			if (creaturesCollected.contains(creatureName) == false) {
+				broadcastMessage("found:" + creatureName);
+				if (creaturesToCollect.contains(creatureName)) {
+					broadcastMessage("to collect:" + creatureName);
+					creaturesCollected.add(creatureName);
 					if (annonceNewCreatures && annonceIfNew) {
-						String displayName = ItemNames.getCreatureDisplayName(CreatureName);
+						String displayName = ItemNames.getCreatureDisplayName(creatureName);
 						String msg = getMessage(annonceNewCreaturesMessage, displayName);
 						broadcastMessage(msg);
 					}
@@ -791,8 +793,8 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 					for (Entity entity : chunk.getEntities()) {
 						if (entity instanceof Creature) {
-							Creature Creature = (Creature) entity;
-							addCreature(Creature, false);
+							Creature creature = (Creature) entity;
+							addCreature(creature, false);
 						}
 					}
 				}

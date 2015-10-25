@@ -756,7 +756,7 @@ creaturesCollection:
   rabbit: true
   sheep: true
   skeleton_horse: true
-  snowman: true
+  snow_golem: true
   undead_horse: true
   villager: true
   wolf: true
