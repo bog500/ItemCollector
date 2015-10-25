@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -31,6 +32,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -80,7 +82,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 	private List<Sign> signsItems = new ArrayList<Sign>();
 	private List<Sign> signsCreatures = new ArrayList<Sign>();
-	private List<Chest> chests = new ArrayList<Chest>();
+	private List<InventoryHolder> chests = new ArrayList<InventoryHolder>();
 
 	@Override
 	public void onEnable() {
@@ -285,15 +287,26 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	@EventHandler
 	public void invClose(InventoryCloseEvent event) {
 		if (updateItemsOnChestClosed) {
-			// Cancel method if not a chest
-			if (!(event.getInventory().getHolder() instanceof Chest))
-				return;
-			Chest chest = (Chest) event.getInventory().getHolder();
-			if (checkLocation(chest.getLocation())) {
-				if (!chests.contains(chest)) {
-					chests.add(chest);
+			
+			if ((event.getInventory().getHolder() instanceof Chest)) {
+				Chest chest = (Chest) event.getInventory().getHolder();
+				if (checkLocation(chest.getLocation())) {
+					if (!chests.contains(chest)) {
+						chests.add(chest);
+					}
+					broadcastMessage("good chest");
+					refreshItems(chest);
 				}
-				refreshItems(chest);
+			}
+			
+			if ((event.getInventory().getHolder() instanceof DoubleChest)) {
+				DoubleChest chest = (DoubleChest) event.getInventory().getHolder();
+				if (checkLocation(chest.getLocation())) {
+					if (!chests.contains(chest)) {
+						chests.add(chest);
+					}
+					refreshItems(chest);
+				}
 			}
 		}
 	}
@@ -304,7 +317,8 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			Sign sign = (Sign) e.getBlock().getState();
 			sign.setLine(0, e.getLine(0));
 			sign.update();
-			updateSign(sign);
+			Player player = e.getPlayer();
+			updateSign(sign, player);
 		}
 	}
 
@@ -314,7 +328,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	}
 
 	public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
-
+		broadcastMessage("interact");
 		if (updateCreaturesOnCreatureFeed) {
 			Entity entity = e.getRightClicked();
 			if (entity == null)
@@ -337,14 +351,22 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 		if (e.getClickedBlock().getState() instanceof Sign) {
 			Sign sign = (Sign) e.getClickedBlock().getState();
-			updateSign(sign);
+			Player player = e.getPlayer();
+			if (checkLocation(sign.getLocation())) {
+				if (sign.getLine(0).equalsIgnoreCase("[Creatures]")) {
+					refreshCreatures();
+				}else if (sign.getLine(0).equalsIgnoreCase("[Items]")) {
+					refreshItems(null);
+				}
+			}
 		}
 	}
 
 	@EventHandler
 	public void onSignChange(SignChangeEvent e) {
 		Sign s = (Sign) e.getBlock().getState();
-		updateSign(s);
+		Player player = e.getPlayer();
+		updateSign(s, player);
 	}
 
 	private void addCreature(Creature Creature, Boolean annonceIfNew) {
@@ -383,17 +405,17 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	private void updateAllSigns() {
 		if (collectItems) {
 			for (Sign sign : signsItems) {
-				updateSign(sign);
+				updateSign(sign, null);
 			}
 		}
 		if (collectCreatures) {
 			for (Sign sign : signsCreatures) {
-				updateSign(sign);
+				updateSign(sign, null);
 			}
 		}
 	}
 
-	private void updateSign(Sign sign) {
+	private void updateSign(Sign sign, Player player) {
 
 		if (checkLocation(sign.getLocation())) {
 			int nbCollected = 0;
@@ -403,16 +425,14 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				if (signsCreatures.contains(sign) == false) {
 					signsCreatures.add(sign);
 				}
-				sign.setLine(0, "[Creatures]");
 				nbCollected = creaturesCollected.size();
 				nbCollection = creaturesToCollect.size();
 				updateSign = true;
-
+				
 			} else if (sign.getLine(0).equalsIgnoreCase("[Items]")) {
 				if (signsItems.contains(sign) == false) {
 					signsItems.add(sign);
 				}
-				sign.setLine(0, "[Items]");
 				nbCollected = itemsCollected.size();
 				nbCollection = itemsToCollect.size();
 				updateSign = true;
@@ -422,6 +442,9 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				sign.setLine(2, ChatColor.RED + " " + nbCollected + "/" + nbCollection);
 				sign.setLine(3, "");
 				sign.update();
+				if(player != null) {
+					player.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Collection updated");
+				}
 			}
 		}
 	}
@@ -780,13 +803,13 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		}
 	}
 
-	private void refreshItems(Chest newChest) {
+	private void refreshItems(InventoryHolder newChest) {
 		if (collectItems) {
 			getChestsAndSigns();
 			HashSet<String> oldItems = new HashSet<String>();
 			oldItems.addAll(itemsCollected);
 			itemsCollected.clear();
-			for (Chest chest : chests) {
+			for (InventoryHolder chest : chests) {
 
 				for (ItemStack items : chest.getInventory().getContents()) {
 					if (items != null) {
@@ -866,5 +889,14 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			return false;
 		}
 		return block1.getX() == block2.getX() && block1.getY() == block2.getY() && block1.getZ() == block2.getZ();
+	}
+	
+	private boolean sameLocation(InventoryHolder inv1, InventoryHolder inv2) {
+		if(inv1 instanceof BlockState && inv2 instanceof BlockState) {
+			BlockState block1 = (BlockState)inv1;
+			BlockState block2 = (BlockState)inv2;
+			return sameLocation(block1, block2);
+		}
+		return false;
 	}
 }
