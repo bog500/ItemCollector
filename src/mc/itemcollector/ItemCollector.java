@@ -912,8 +912,11 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		if(loc1 == null || loc2 == null)
 			return false;
 				
-		return (Math.floor(loc1.getX()) == Math.floor(loc2.getX()) && Math.floor(loc1.getY()) == Math.floor(loc2.getY()) && Math.floor(loc1.getZ()) == Math.floor(loc2.getZ()))
-				||
-				Math.ceil(loc1.getX()) == Math.ceil(loc2.getX()) && Math.ceil(loc1.getY()) == Math.ceil(loc2.getY()) && Math.ceil(loc1.getZ()) == Math.ceil(loc2.getZ());
+		return (Math.floor(loc1.getX()) == Math.floor(loc2.getX()) || Math.ceil(loc1.getX()) == Math.ceil(loc2.getX()))
+				&&
+				(Math.floor(loc1.getY()) == Math.floor(loc2.getY()) || Math.ceil(loc1.getY()) == Math.ceil(loc2.getY()))
+				&&
+				(Math.floor(loc1.getZ()) == Math.floor(loc2.getZ()) || Math.ceil(loc1.getZ()) == Math.ceil(loc2.getZ()));
+		
 	}
 }
