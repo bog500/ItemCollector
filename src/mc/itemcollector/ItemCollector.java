@@ -294,7 +294,6 @@ public class ItemCollector extends JavaPlugin implements Listener {
 					if (!chests.contains(chest)) {
 						chests.add(chest);
 					}
-					broadcastMessage("good chest");
 					refreshItems(chest);
 				}
 			}
@@ -883,19 +882,35 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		}
 	}
 
-	private boolean sameLocation(BlockState block1, BlockState block2) {
-		if (block1 == null || block2 == null) {
+	
+	private boolean sameLocation(Object inv1, Object inv2) {
+		
+		if (inv1 == null || inv2 == null) {
 			return false;
 		}
-		return block1.getX() == block2.getX() && block1.getY() == block2.getY() && block1.getZ() == block2.getZ();
-	}
-	
-	private boolean sameLocation(InventoryHolder inv1, InventoryHolder inv2) {
-		if(inv1 instanceof BlockState && inv2 instanceof BlockState) {
-			BlockState block1 = (BlockState)inv1;
-			BlockState block2 = (BlockState)inv2;
-			return sameLocation(block1, block2);
+		
+		Location loc1 = null;
+		Location loc2 = null;
+		
+		if(inv1 instanceof BlockState) {
+			BlockState block = (BlockState)inv1;
+			loc1 = block.getLocation();
+		}else if(inv1 instanceof DoubleChest) {
+			DoubleChest doublechest = (DoubleChest)inv1;
+			loc1 = doublechest.getLocation();
 		}
-		return false;
+		
+		if(inv2 instanceof BlockState) {
+			BlockState block = (BlockState)inv2;
+			loc2 = block.getLocation();
+		}else if(inv2 instanceof DoubleChest) {
+			DoubleChest doublechest = (DoubleChest)inv2;
+			loc2 = doublechest.getLocation();
+		}
+		
+		if(loc1 == null || loc2 == null)
+			return false;
+		
+		return loc1.getX() == loc2.getX() && loc1.getY() == loc2.getY() && loc1.getZ() == loc2.getZ();
 	}
 }
