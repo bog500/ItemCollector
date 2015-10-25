@@ -16,6 +16,9 @@ public enum ListType {
 		case "collected":
 			return ListType.COLLECTED;
 			
+		case "missing":
+			return ListType.MISSING;
+			
 			default:
 				return ListType.ALL;
 		}
