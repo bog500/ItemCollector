@@ -61,6 +61,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 	private boolean updateItemsOnChestClosed = true;
 	private boolean updateCreaturesOnCreatureFeed = true;
+	private boolean updateCreaturesOnCreatureDamaged = false;
 
 	private String annonceInventoryItemsOnPlayerJoinMessage = ChatColor.DARK_RED + "Item collection: "
 			+ ChatColor.DARK_GREEN + "<nbCollectedItems> / <nbTotalItems>";
@@ -121,6 +122,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 		config.set("updateItemsOnChestClosed", updateItemsOnChestClosed);
 		config.set("updateCreaturesOnCreatureFeed", updateCreaturesOnCreatureFeed);
+		config.set("updateCreaturesOnCreatureDamaged", updateCreaturesOnCreatureDamaged);
 
 		config.set("messagePrefix", messagePrefix);
 		config.set("annonceInventoryItemsOnPlayerJoinMessage", annonceInventoryItemsOnPlayerJoinMessage);
@@ -186,6 +188,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 		config.addDefault("updateItemsOnChestClosed", updateItemsOnChestClosed);
 		config.addDefault("updateCreaturesOnCreatureFeed", updateCreaturesOnCreatureFeed);
+		config.addDefault("updateCreaturesOnCreatureDamaged", updateCreaturesOnCreatureDamaged);
 
 		config.addDefault("messagePrefix", messagePrefix);
 		config.addDefault("annonceInventoryItemsOnPlayerJoinMessage", annonceInventoryItemsOnPlayerJoinMessage);
@@ -238,6 +241,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 		updateItemsOnChestClosed = config.getBoolean("updateItemsOnChestClosed");
 		updateCreaturesOnCreatureFeed = config.getBoolean("updateCreaturesOnCreatureFeed");
+		updateCreaturesOnCreatureDamaged = config.getBoolean("updateCreaturesOnCreatureDamaged");
 
 		messagePrefix = config.getString("messagePrefix");
 		annonceInventoryItemsOnPlayerJoinMessage = config.getString("annonceInventoryItemsOnPlayerJoinMessage");
@@ -323,7 +327,17 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void onEntityDamage(EntityDamageEvent e) {
-		// recount ?
+		if(updateCreaturesOnCreatureDamaged) {
+			Entity entity = e.getEntity();
+			if (entity == null)
+				return;
+
+			if (entity instanceof Creature) {
+				Creature a = (Creature) entity;
+				addCreature(a, true);
+				updateAllSigns();
+			}
+		}
 	}
 
 	@EventHandler
@@ -371,9 +385,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		if (checkLocation(Creature.getLocation())) {
 			String creatureName = getCreatureName(Creature).toLowerCase().replace(" ", "_");
 			if (creaturesCollected.contains(creatureName) == false) {
-				broadcastMessage("found:" + creatureName);
 				if (creaturesToCollect.contains(creatureName)) {
-					broadcastMessage("to collect:" + creatureName);
 					creaturesCollected.add(creatureName);
 					if (annonceNewCreatures && annonceIfNew) {
 						String displayName = ItemNames.getCreatureDisplayName(creatureName);
@@ -647,6 +659,9 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				
 			case "updatecreaturesoncreaturefeed":
 				updateCreaturesOnCreatureFeed = value;
+				
+			case "updateCreaturesOnCreatureDamaged":
+				updateCreaturesOnCreatureDamaged = value;
 				break;
 				
 			default:

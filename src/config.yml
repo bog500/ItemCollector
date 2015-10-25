@@ -16,6 +16,7 @@ annonceNewItems: true
 annonceNewCreatures: true
 updateItemsOnChestClosed: true
 updateCreaturesOnCreatureFeed: true
+updateCreaturesOnCreatureDamaged: true
 
 # Messages
 messagePrefix: "\xa7o\xa77[\xa7aItemCollector\xa77]\xa7r"
@@ -755,8 +756,8 @@ creaturesCollection:
   pig: true
   rabbit: true
   sheep: true
-  skeleton_horse: true
+  skeleton_horse: false
   snow_golem: true
-  undead_horse: true
+  undead_horse: false
   villager: true
   wolf: true
