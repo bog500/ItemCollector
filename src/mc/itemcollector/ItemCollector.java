@@ -327,15 +327,14 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		// recount ?
 	}
 
+	@EventHandler
 	public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
-		broadcastMessage("interact");
 		if (updateCreaturesOnCreatureFeed) {
 			Entity entity = e.getRightClicked();
 			if (entity == null)
 				return;
 
 			if (entity instanceof Creature) {
-				broadcastMessage("interact Creature");
 				Creature a = (Creature) entity;
 				addCreature(a, true);
 				updateAllSigns();

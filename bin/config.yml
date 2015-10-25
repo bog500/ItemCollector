@@ -24,7 +24,7 @@ annonceInventoryItemsOnPlayerJoinMessage: "\xa74Item collection: \xa72<nbCollect
 annonceInventoryCreaturesOnPlayerJoinMessage: "\xa74Creature collection: \xa72 <nbCollectedCreatures>\
   \ / <nbTotalCreatures>"
 annonceNewItemsMessage: "\xa74New item in the collection: \xa7l\xa7a<itemName>"
-annonceNewCreaturesMessage: "\xa74New Creature in the collection: \xa7l\xa7a<CreatureName>"
+annonceNewCreaturesMessage: "\xa74New Creature in the collection: \xa7l\xa7a<creatureName>"
 
 # List of items Ids that players will try to collect
 # www.minecraftinfo.com/idlist.htm
@@ -210,7 +210,7 @@ itemsCollection:
   '95:14': true
   '95:15': true
   '96': true
-  '97': true # to verify
+  '97': true
   '97:1': true
   '97:2': true
   '97:3': true
@@ -220,8 +220,8 @@ itemsCollection:
   '98:1': true
   '98:2': true
   '98:3': true
-  '99': true  # to verify
-  '100': true  # to verify
+  '99': true
+  '100': true
   '101': true
   '102': true
   '103': true
@@ -236,14 +236,14 @@ itemsCollection:
   '112': true
   '113': true
   '114': true
-  '115': true # to verify
+  '115': false #Nether wart (plant)
   '116': true
   '117': false
   '118': false
-  '119': true # to verify
-  '120': true # to verify
+  '119': false
+  '120': false
   '121': true
-  '122': true # to verify
+  '122': true
   '123': true
   '125': false
   '125:1': false
@@ -257,7 +257,7 @@ itemsCollection:
   '126:3': true
   '126:4': true
   '126:5': true
-  '127': false # to verify
+  '127': false #Cocoa nut
   '128': true
   '129': true
   '130': true
@@ -283,7 +283,7 @@ itemsCollection:
   '145': true
   '145:1': true
   '145:2': true
-  '146': true # verify
+  '146': true
   '147': true
   '148': true
   '149': false
@@ -579,10 +579,10 @@ itemsCollection:
   '373:8267': true
   '373:8269': true
   '373:8270': true
-  '373:8289': true #to verify
-  '373:8290': true #to verify
-  '373:8292': true #to verify
-  '373:8297': true #to verify
+  '373:8289': false
+  '373:8290': false
+  '373:8292': false
+  '373:8297': false
   '373:16385': true
   '373:16386': true
   '373:16387': true
