@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -39,6 +40,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class ItemCollector extends JavaPlugin implements Listener {
 
 	SettingsManager settings = SettingsManager.getInstance();
+	CollectionWriter writer;
 
 	private String messagePrefix = ChatColor.ITALIC + "" + ChatColor.GRAY + "[" + ChatColor.GREEN + "ItemCollector"
 			+ ChatColor.GRAY + "]" + ChatColor.RESET;
@@ -49,7 +51,10 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	private int maxZ = 100;
 
 	private String worldName = "world";
+	private String outputFile = "/itemcollector.json";
 
+	private boolean generateOutputFile = false;
+	
 	private boolean collectCreatures = true;
 	private boolean collectItems = true;
 
@@ -93,13 +98,19 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		getSavedConfig();
 		Bukkit.getServer().getPluginManager().registerEvents(this, this);
 
+		writer = new CollectionWriter(outputFile, itemsToCollect, creaturesToCollect);
+		
 		try
 		{
 			refreshCollections();
 		}
 		catch(Exception ex) {
-			Bukkit.getServer().getLogger().warning(ChatColor.RED + "ItemCollector encountered an error at startup!  Make sure the worl and region are defined correctly in the configuration.");
+			Bukkit.getServer().getLogger().log(Level.SEVERE, ChatColor.RED + "ItemCollector encountered an error at startup!  Make sure the worl and region are defined correctly in the configuration.", ex);
 		}
+		
+		writer.setItemsToCollect(itemsToCollect);
+		writer.setCreaturesToCollect(creaturesToCollect);
+		writer.WriteFile(itemsCollected, creaturesCollected);
 	}
 
 	@Override
@@ -116,9 +127,12 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		config.set("maxZ", maxZ);
 
 		config.set("worldName", worldName);
+		config.set("outputFile", outputFile);
 
 		config.set("collectCreatures", collectCreatures);
 		config.set("collectItems", collectItems);
+		
+		config.set("generateOutputFile", generateOutputFile);
 
 		config.set("annonceInventoryItemsOnPlayerJoin", annonceInventoryItemsOnPlayerJoin);
 		config.set("annonceInventoryCreaturesOnPlayerJoin", annonceInventoryCreaturesOnPlayerJoin);
@@ -182,6 +196,9 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		config.addDefault("maxZ", maxZ);
 
 		config.addDefault("worldName", worldName);
+		
+		config.addDefault("outputFile", outputFile);		
+		config.addDefault("generateOutputFile", generateOutputFile);
 
 		config.addDefault("collectCreatures", collectCreatures);
 		config.addDefault("collectItems", collectItems);
@@ -235,9 +252,11 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		maxZ = config.getInt("maxZ");
 
 		worldName = config.getString("worldName");
+		outputFile = config.getString("outputFile");		
 
 		collectCreatures = config.getBoolean("collectCreatures");
 		collectItems = config.getBoolean("collectItems");
+		generateOutputFile = config.getBoolean("generateOutputFile");
 
 		annonceInventoryItemsOnPlayerJoin = config.getBoolean("annonceInventoryItemsOnPlayerJoin");
 		annonceInventoryCreaturesOnPlayerJoin = config.getBoolean("annonceInventoryCreaturesOnPlayerJoin");
@@ -431,6 +450,9 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				updateSign(sign, null);
 			}
 		}
+		if(generateOutputFile) {
+			writer.WriteFile(itemsCollected, creaturesCollected);
+		}
 	}
 
 	private void updateSign(Sign sign, Player player) {
@@ -555,6 +577,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "This Creature is already collected");
 				} else {
 					creaturesToCollect.add(args[2]);
+					writer.setCreaturesToCollect(creaturesToCollect);
 					saveNewConfig();
 					refreshCreatures();
 					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Creature added");
@@ -572,6 +595,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "This item is already collected");
 				} else {
 					itemsToCollect.add(args[2]);
+					writer.setItemsToCollect(itemsToCollect);
 					saveNewConfig();
 					refreshItems(null);
 					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Item added");
@@ -594,6 +618,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				}
 				if (creaturesToCollect.contains(args[2])) {
 					creaturesToCollect.remove(args[2]);
+					writer.setCreaturesToCollect(creaturesToCollect);
 					saveNewConfig();
 					refreshCreatures();
 					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Creature removed");
@@ -611,6 +636,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				}
 				if (itemsToCollect.contains(args[2])) {
 					itemsToCollect.remove(args[2]);
+					writer.setItemsToCollect(itemsToCollect);
 					saveNewConfig();
 					refreshItems(null);
 					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Item removed");
@@ -657,6 +683,9 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				
 			}
 			switch(args[2].toLowerCase()) {
+			case "generateoutputfile":
+				generateOutputFile = value;
+				break;
 			case "collectcreatures":
 				collectCreatures = value;
 				break;
@@ -710,6 +739,21 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			}
 			worldName = args[2];
 			sender.sendMessage(messagePrefix + "World set to " + ChatColor.GREEN + worldName);
+			saveNewConfig();
+			refreshItems(null);
+			refreshCreatures();
+			return true;
+		}
+		else if (args.length == 4 && args[1].equalsIgnoreCase("outputfile")) {
+			if (sender instanceof Player) {
+				Player player = (Player) sender;
+				if (!player.hasPermission("itemcollector.set.outputfile")) {
+					sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+					return true;
+				}
+			}
+			outputFile = args[2];
+			sender.sendMessage(messagePrefix + "Outputfile set to " + ChatColor.GREEN + worldName);
 			saveNewConfig();
 			refreshItems(null);
 			refreshCreatures();

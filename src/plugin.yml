@@ -30,6 +30,7 @@ permissions:
           itemcollector.set.option: true
           itemcollector.set.world: true
           itemcollector.set.region: true
+          itemcollector.set.outputfile: true
 
           
 commands:

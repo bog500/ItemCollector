@@ -6,6 +6,7 @@ maxZ: 64
 
 # name of the world containing the region where the items/Creatures must be brought back
 worldName: world
+outputFile: itemcollector.json
 
 # On/Off features
 collectCreatures: true
@@ -17,6 +18,7 @@ annonceNewCreatures: true
 updateItemsOnChestClosed: true
 updateCreaturesOnCreatureFeed: true
 updateCreaturesOnCreatureDamaged: true
+generateOutputFile: false
 
 # Messages
 messagePrefix: "\xa7o\xa77[\xa7aItemCollector\xa77]\xa7r"

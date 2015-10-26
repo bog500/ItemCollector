@@ -25,30 +25,30 @@ public class SettingsManager {
         File cfile;
        
         public void setup(Plugin p) {
-                config = p.getConfig();
-                config.options().copyDefaults(true);
-                cfile = new File(p.getDataFolder(), "config.yml");
-                saveConfig();
+            config = p.getConfig();
+            config.options().copyDefaults(true);
+            cfile = new File(p.getDataFolder(), "config.yml");
+            saveConfig();
         }
        
         public FileConfiguration getConfig() {
-                return config;
+            return config;
         }
        
         public void saveConfig() {
-                try {
-                        config.save(cfile);
-                }
-                catch (IOException e) {
-                        Bukkit.getServer().getLogger().severe(ChatColor.RED + "Could not save config.yml!");
-                }
+            try {
+                    config.save(cfile);
+            }
+            catch (IOException e) {
+                    Bukkit.getServer().getLogger().severe(ChatColor.RED + "Could not save config.yml!");
+            }
         }
        
         public void reloadConfig() {
-                config = YamlConfiguration.loadConfiguration(cfile);
+            config = YamlConfiguration.loadConfiguration(cfile);
         }
        
         public PluginDescriptionFile getDesc() {
-                return p.getDescription();
+            return p.getDescription();
         }
 }
