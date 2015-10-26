@@ -214,7 +214,7 @@ itemsCollection:
   '95:15': true
   '96': true
   '97': true
-  '97:1': true
+  '97:1': false
   '97:2': true
   '97:3': true
   '97:4': true
