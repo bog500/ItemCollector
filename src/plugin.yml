@@ -3,7 +3,35 @@ version: 1.0.0
 main: mc.itemcollector.ItemCollector
 author: BOG500
 description: Collect all the items in Minecraft !
+permissions:
+  itemcollector.*:
+    description: Gives access to all Inferno commands
+    children:
+      itemcollector.count: true
+      itemcollector.refresh.*:
+        children:
+          itemcollector.refresh.items: true
+          itemcollector.refresh.creatures: true
+      itemcollector.list.*:
+        children:
+          itemcollector.list.items: true
+          itemcollector.list.creatures: true
+      itemcollector.add.*:
+        children:
+          itemcollector.add.item: true
+          itemcollector.add.creature: true
+      itemcollector.remove.*:
+        children:
+          itemcollector.remove.item: true
+          itemcollector.remove.creature: true
+      itemcollector.set.*:
+        children:
+          itemcollector.set.message: true
+          itemcollector.set.option: true
+          itemcollector.set.world: true
+          itemcollector.set.region: true
 
+          
 commands:
      itemcollector:
           usage: /itemcollector <list|refresh|count|add|remove|set>

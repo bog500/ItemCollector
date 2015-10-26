@@ -468,12 +468,27 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	}
 
 	private boolean listCommand(CommandSender sender, String[] args) {
+		
 		if(args.length == 3) {
 			ListType listType = ListType.getListType(args[2]);
 			if (args[1].equalsIgnoreCase("creatures")) {
+				if (sender instanceof Player) {
+					Player player = (Player) sender;
+					if (!player.hasPermission("itemcollector.list.creatures")) {
+						sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+						return true;
+					}
+				}
 				listCreatures(sender, listType);
 				return true;
 			} else if (args[1].equalsIgnoreCase("items")) {
+				if (sender instanceof Player) {
+					Player player = (Player) sender;
+					if (!player.hasPermission("itemcollector.list.items")) {
+						sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+						return true;
+					}
+				}
 				listItems(sender, listType);
 				return true;
 			}
@@ -508,7 +523,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			Player player = (Player) sender;
 			if (!player.hasPermission("itemcollector.count")) {
 				sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
-				return false;
+				return true;
 			}
 		}
 		if (collectCreatures) {
@@ -745,14 +760,6 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 
 		if (cmd.getName().equalsIgnoreCase("itemcollector")) {
-
-			if (sender instanceof Player) {
-				Player player = (Player) sender;
-				if (!player.hasPermission("itemcollector")) {
-					sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
-					return true;
-				}
-			}
 			
 			if(args.length >= 1) {
 				if(args[0].equalsIgnoreCase("list")) {
