@@ -93,7 +93,13 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		getSavedConfig();
 		Bukkit.getServer().getPluginManager().registerEvents(this, this);
 
-		refreshCollections();
+		try
+		{
+			refreshCollections();
+		}
+		catch(Exception ex) {
+			Bukkit.getServer().getLogger().warning(ChatColor.RED + "ItemCollector encountered an error at startup!  Make sure the worl and region are defined correctly in the configuration.");
+		}
 	}
 
 	@Override
@@ -500,7 +506,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	private boolean countCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
-			if (!player.hasPermission("itemcollector.remove.count")) {
+			if (!player.hasPermission("itemcollector.count")) {
 				sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
 				return false;
 			}
@@ -622,6 +628,13 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			return true;
 		} 
 		else if (args.length == 4 && args[1].equalsIgnoreCase("option")) {
+			if (sender instanceof Player) {
+				Player player = (Player) sender;
+				if (!player.hasPermission("itemcollector.set.option")) {
+					sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+					return true;
+				}
+			}
 			boolean value = false;
 			try  {
 				value = Boolean.getBoolean(args[3]);
@@ -673,6 +686,13 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			return true;
 		}
 		else if (args.length == 4 && args[1].equalsIgnoreCase("world")) {
+			if (sender instanceof Player) {
+				Player player = (Player) sender;
+				if (!player.hasPermission("itemcollector.set.world")) {
+					sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+					return true;
+				}
+			}
 			worldName = args[2];
 			sender.sendMessage(messagePrefix + "World set to " + ChatColor.GREEN + worldName);
 			saveNewConfig();
@@ -681,6 +701,13 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			return true;
 		}
 		else if (args.length == 4 && args[1].equalsIgnoreCase("message")) {
+			if (sender instanceof Player) {
+				Player player = (Player) sender;
+				if (!player.hasPermission("itemcollector.set.message")) {
+					sender.sendMessage(messagePrefix + ChatColor.RED + "You are not permitted to do this!");
+					return true;
+				}
+			}
 			String newMsg = args[3];
 			switch(args[2].toLowerCase()) {
 			case "messagePrefix":
