@@ -11,10 +11,10 @@ outputFile: itemcollector.json
 # On/Off features
 collectCreatures: true
 collectItems: true
-annonceInventoryItemsOnPlayerJoin: true
-annonceInventoryCreaturesOnPlayerJoin: true
-annonceNewItems: true
-annonceNewCreatures: true
+announceInventoryItemsOnPlayerJoin: true
+announceInventoryCreaturesOnPlayerJoin: true
+announceNewItems: true
+announceNewCreatures: true
 updateItemsOnChestClosed: true
 updateCreaturesOnCreatureFeed: true
 updateCreaturesOnCreatureDamaged: true
@@ -22,12 +22,12 @@ generateOutputFile: false
 
 # Messages
 messagePrefix: "\xa7o\xa77[\xa7aItemCollector\xa77]\xa7r"
-annonceInventoryItemsOnPlayerJoinMessage: "\xa74Item collection: \xa72<nbCollectedItems>\
+announceInventoryItemsOnPlayerJoinMessage: "\xa74Item collection: \xa72<nbCollectedItems>\
   \ / <nbTotalItems>"
-annonceInventoryCreaturesOnPlayerJoinMessage: "\xa74Creature collection: \xa72 <nbCollectedCreatures>\
+announceInventoryCreaturesOnPlayerJoinMessage: "\xa74Creature collection: \xa72 <nbCollectedCreatures>\
   \ / <nbTotalCreatures>"
-annonceNewItemsMessage: "\xa74New item in the collection: \xa7l\xa7a<itemName>"
-annonceNewCreaturesMessage: "\xa74New Creature in the collection: \xa7l\xa7a<creatureName>"
+announceNewItemsMessage: "\xa74New item in the collection: \xa7l\xa7a<itemName>"
+announceNewCreaturesMessage: "\xa74New Creature in the collection: \xa7l\xa7a<creatureName>"
 
 # List of items Ids that players will try to collect
 # www.minecraftinfo.com/idlist.htm

@@ -58,23 +58,23 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	private boolean collectCreatures = true;
 	private boolean collectItems = true;
 
-	private boolean annonceInventoryItemsOnPlayerJoin = true;
-	private boolean annonceInventoryCreaturesOnPlayerJoin = true;
+	private boolean announceInventoryItemsOnPlayerJoin = true;
+	private boolean announceInventoryCreaturesOnPlayerJoin = true;
 
-	private boolean annonceNewItems = true;
-	private boolean annonceNewCreatures = true;
+	private boolean announceNewItems = true;
+	private boolean announceNewCreatures = true;
 
 	private boolean updateItemsOnChestClosed = true;
 	private boolean updateCreaturesOnCreatureFeed = true;
 	private boolean updateCreaturesOnCreatureDamaged = false;
 
-	private String annonceInventoryItemsOnPlayerJoinMessage = ChatColor.DARK_RED + "Item collection: "
+	private String announceInventoryItemsOnPlayerJoinMessage = ChatColor.DARK_RED + "Item collection: "
 			+ ChatColor.DARK_GREEN + "<nbCollectedItems> / <nbTotalItems>";
-	private String annonceInventoryCreaturesOnPlayerJoinMessage = ChatColor.DARK_RED + "Creature collection: "
+	private String announceInventoryCreaturesOnPlayerJoinMessage = ChatColor.DARK_RED + "Creature collection: "
 			+ ChatColor.DARK_GREEN + " <nbCollectedCreatures> / <nbTotalCreatures>";
-	private String annonceNewItemsMessage = ChatColor.DARK_RED + "New item in the collection: " + ChatColor.BOLD + ""
+	private String announceNewItemsMessage = ChatColor.DARK_RED + "New item in the collection: " + ChatColor.BOLD + ""
 			+ ChatColor.GREEN + "<itemName>";
-	private String annonceNewCreaturesMessage = ChatColor.DARK_RED + "New Creature in the collection: " + ChatColor.BOLD
+	private String announceNewCreaturesMessage = ChatColor.DARK_RED + "New Creature in the collection: " + ChatColor.BOLD
 			+ "" + ChatColor.GREEN + "<creatureName>";
 
 	private List<Map<?, ?>> itemsCollection;
@@ -105,7 +105,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			refreshCollections();
 		}
 		catch(Exception ex) {
-			Bukkit.getServer().getLogger().log(Level.SEVERE, ChatColor.RED + "ItemCollector encountered an error at startup!  Make sure the worl and region are defined correctly in the configuration.", ex);
+			Bukkit.getServer().getLogger().log(Level.SEVERE, ChatColor.RED + "ItemCollector encountered an error at startup!  Make sure the world and region are defined correctly in the configuration.", ex);
 		}
 		
 		writer.setItemsToCollect(itemsToCollect);
@@ -134,21 +134,21 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		
 		config.set("generateOutputFile", generateOutputFile);
 
-		config.set("annonceInventoryItemsOnPlayerJoin", annonceInventoryItemsOnPlayerJoin);
-		config.set("annonceInventoryCreaturesOnPlayerJoin", annonceInventoryCreaturesOnPlayerJoin);
+		config.set("announceInventoryItemsOnPlayerJoin", announceInventoryItemsOnPlayerJoin);
+		config.set("announceInventoryCreaturesOnPlayerJoin", announceInventoryCreaturesOnPlayerJoin);
 
-		config.set("annonceNewItems", annonceNewItems);
-		config.set("annonceNewCreatures", annonceNewCreatures);
+		config.set("announceNewItems", announceNewItems);
+		config.set("announceNewCreatures", announceNewCreatures);
 
 		config.set("updateItemsOnChestClosed", updateItemsOnChestClosed);
 		config.set("updateCreaturesOnCreatureFeed", updateCreaturesOnCreatureFeed);
 		config.set("updateCreaturesOnCreatureDamaged", updateCreaturesOnCreatureDamaged);
 
 		config.set("messagePrefix", messagePrefix);
-		config.set("annonceInventoryItemsOnPlayerJoinMessage", annonceInventoryItemsOnPlayerJoinMessage);
-		config.set("annonceInventoryCreaturesOnPlayerJoinMessage", annonceInventoryCreaturesOnPlayerJoinMessage);
-		config.set("annonceNewItemsMessage", annonceNewItemsMessage);
-		config.set("annonceNewCreaturesMessage", annonceNewCreaturesMessage);
+		config.set("announceInventoryItemsOnPlayerJoinMessage", announceInventoryItemsOnPlayerJoinMessage);
+		config.set("announceInventoryCreaturesOnPlayerJoinMessage", announceInventoryCreaturesOnPlayerJoinMessage);
+		config.set("announceNewItemsMessage", announceNewItemsMessage);
+		config.set("announceNewCreaturesMessage", announceNewCreaturesMessage);
 
 		HashMap<String, Boolean> items = new HashMap<String, Boolean>();
 
@@ -203,21 +203,21 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		config.addDefault("collectCreatures", collectCreatures);
 		config.addDefault("collectItems", collectItems);
 
-		config.addDefault("annonceInventoryItemsOnPlayerJoin", annonceInventoryItemsOnPlayerJoin);
-		config.addDefault("annonceInventoryCreaturesOnPlayerJoin", annonceInventoryCreaturesOnPlayerJoin);
+		config.addDefault("announceInventoryItemsOnPlayerJoin", announceInventoryItemsOnPlayerJoin);
+		config.addDefault("announceInventoryCreaturesOnPlayerJoin", announceInventoryCreaturesOnPlayerJoin);
 
-		config.addDefault("annonceNewItems", annonceNewItems);
-		config.addDefault("annonceNewCreatures", annonceNewCreatures);
+		config.addDefault("announceNewItems", announceNewItems);
+		config.addDefault("announceNewCreatures", announceNewCreatures);
 
 		config.addDefault("updateItemsOnChestClosed", updateItemsOnChestClosed);
 		config.addDefault("updateCreaturesOnCreatureFeed", updateCreaturesOnCreatureFeed);
 		config.addDefault("updateCreaturesOnCreatureDamaged", updateCreaturesOnCreatureDamaged);
 
 		config.addDefault("messagePrefix", messagePrefix);
-		config.addDefault("annonceInventoryItemsOnPlayerJoinMessage", annonceInventoryItemsOnPlayerJoinMessage);
-		config.addDefault("annonceInventoryCreaturesOnPlayerJoinMessage", annonceInventoryCreaturesOnPlayerJoinMessage);
-		config.addDefault("annonceNewItemsMessage", annonceNewItemsMessage);
-		config.addDefault("annonceNewCreaturesMessage", annonceNewCreaturesMessage);
+		config.addDefault("announceInventoryItemsOnPlayerJoinMessage", announceInventoryItemsOnPlayerJoinMessage);
+		config.addDefault("announceInventoryCreaturesOnPlayerJoinMessage", announceInventoryCreaturesOnPlayerJoinMessage);
+		config.addDefault("announceNewItemsMessage", announceNewItemsMessage);
+		config.addDefault("announceNewCreaturesMessage", announceNewCreaturesMessage);
 
 		HashMap<String, Boolean> items = new HashMap<String, Boolean>();
 
@@ -258,21 +258,21 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		collectItems = config.getBoolean("collectItems");
 		generateOutputFile = config.getBoolean("generateOutputFile");
 
-		annonceInventoryItemsOnPlayerJoin = config.getBoolean("annonceInventoryItemsOnPlayerJoin");
-		annonceInventoryCreaturesOnPlayerJoin = config.getBoolean("annonceInventoryCreaturesOnPlayerJoin");
+		announceInventoryItemsOnPlayerJoin = config.getBoolean("announceInventoryItemsOnPlayerJoin");
+		announceInventoryCreaturesOnPlayerJoin = config.getBoolean("announceInventoryCreaturesOnPlayerJoin");
 
-		annonceNewItems = config.getBoolean("annonceNewItems");
-		annonceNewCreatures = config.getBoolean("annonceNewCreatures");
+		announceNewItems = config.getBoolean("announceNewItems");
+		announceNewCreatures = config.getBoolean("announceNewCreatures");
 
 		updateItemsOnChestClosed = config.getBoolean("updateItemsOnChestClosed");
 		updateCreaturesOnCreatureFeed = config.getBoolean("updateCreaturesOnCreatureFeed");
 		updateCreaturesOnCreatureDamaged = config.getBoolean("updateCreaturesOnCreatureDamaged");
 
 		messagePrefix = config.getString("messagePrefix");
-		annonceInventoryItemsOnPlayerJoinMessage = config.getString("annonceInventoryItemsOnPlayerJoinMessage");
-		annonceInventoryCreaturesOnPlayerJoinMessage = config.getString("annonceInventoryCreaturesOnPlayerJoinMessage");
-		annonceNewItemsMessage = config.getString("annonceNewItemsMessage");
-		annonceNewCreaturesMessage = config.getString("annonceNewCreaturesMessage");
+		announceInventoryItemsOnPlayerJoinMessage = config.getString("announceInventoryItemsOnPlayerJoinMessage");
+		announceInventoryCreaturesOnPlayerJoinMessage = config.getString("announceInventoryCreaturesOnPlayerJoinMessage");
+		announceNewItemsMessage = config.getString("announceNewItemsMessage");
+		announceNewCreaturesMessage = config.getString("announceNewCreaturesMessage");
 
 		itemsCollection = config.getMapList("itemsCollection");
 		creaturesCollection = config.getMapList("creaturesCollection");
@@ -302,12 +302,12 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		Player player = e.getPlayer();
-		if (annonceInventoryCreaturesOnPlayerJoin && collectCreatures) {
-			String msg = getMessage(annonceInventoryCreaturesOnPlayerJoinMessage, "");
+		if (announceInventoryCreaturesOnPlayerJoin && collectCreatures) {
+			String msg = getMessage(announceInventoryCreaturesOnPlayerJoinMessage, "");
 			player.sendMessage(msg);
 		}
-		if (annonceInventoryItemsOnPlayerJoin && collectItems) {
-			String msg = getMessage(annonceInventoryItemsOnPlayerJoinMessage, "");
+		if (announceInventoryItemsOnPlayerJoin && collectItems) {
+			String msg = getMessage(announceInventoryItemsOnPlayerJoinMessage, "");
 			player.sendMessage(msg);
 		}
 
@@ -359,8 +359,10 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 			if (entity instanceof Creature) {
 				Creature a = (Creature) entity;
-				addCreature(a, true);
-				updateAllSigns();
+				boolean isNew = addCreature(a, true);
+				if(isNew) {
+					updateAllSigns();
+				}
 			}
 		}
 	}
@@ -406,20 +408,22 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		updateSign(s, player);
 	}
 
-	private void addCreature(Creature Creature, Boolean annonceIfNew) {
+	private boolean addCreature(Creature Creature, Boolean announceIfNew) {
 		if (checkLocation(Creature.getLocation())) {
 			String creatureName = getCreatureName(Creature).toLowerCase().replace(" ", "_");
 			if (creaturesCollected.contains(creatureName) == false) {
 				if (creaturesToCollect.contains(creatureName)) {
 					creaturesCollected.add(creatureName);
-					if (annonceNewCreatures && annonceIfNew) {
+					if (announceNewCreatures && announceIfNew) {
 						String displayName = ItemNames.getCreatureDisplayName(creatureName);
-						String msg = getMessage(annonceNewCreaturesMessage, displayName);
+						String msg = getMessage(announceNewCreaturesMessage, displayName);
 						broadcastMessage(msg);
 					}
 				}
+				return true;
 			}
 		}
+		return false;
 	}
 
 	private String getCreatureName(Creature creature) {
@@ -549,11 +553,11 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			}
 		}
 		if (collectCreatures) {
-			String msg = getMessage(annonceInventoryCreaturesOnPlayerJoinMessage, "");
+			String msg = getMessage(announceInventoryCreaturesOnPlayerJoinMessage, "");
 			sender.sendMessage(msg);
 		}
 		if (collectItems) {
-			String msg = getMessage(annonceInventoryItemsOnPlayerJoinMessage, "");
+			String msg = getMessage(announceInventoryItemsOnPlayerJoinMessage, "");
 			sender.sendMessage(msg);
 		}
 		if (!collectCreatures && !collectItems) {
@@ -694,20 +698,20 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				collectItems = value;
 				break;
 				
-			case "annonceinventoryitemsonplayerjoin":
-				annonceInventoryItemsOnPlayerJoin = value;
+			case "announceinventoryitemsonplayerjoin":
+				announceInventoryItemsOnPlayerJoin = value;
 				break;
 				
-			case "annonceinventorycreaturesonplayerjoin":
-				annonceInventoryCreaturesOnPlayerJoin = value;
+			case "announceinventorycreaturesonplayerjoin":
+				announceInventoryCreaturesOnPlayerJoin = value;
 				break;
 				
-			case "annoncenewitems":
-				annonceNewItems = value;
+			case "announcenewitems":
+				announceNewItems = value;
 				break;
 				
-			case "annoncenewcreatures":
-				annonceNewCreatures = value;
+			case "announcenewcreatures":
+				announceNewCreatures = value;
 				break;
 				
 			case "updateitemsonchestclosed":
@@ -753,7 +757,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				}
 			}
 			outputFile = args[2];
-			sender.sendMessage(messagePrefix + "Outputfile set to " + ChatColor.GREEN + worldName);
+			sender.sendMessage(messagePrefix + "Outputfile set to " + ChatColor.GREEN + outputFile);
 			saveNewConfig();
 			refreshItems(null);
 			refreshCreatures();
@@ -773,20 +777,20 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				messagePrefix = newMsg;
 				break;
 				
-			case "annonceinventoryitemsonplayerjoinmessage":
-				annonceInventoryItemsOnPlayerJoinMessage = newMsg;
+			case "announceinventoryitemsonplayerjoinmessage":
+				announceInventoryItemsOnPlayerJoinMessage = newMsg;
 				break;
 				
-			case "annonceinventorycreaturesonplayerjoinmessage":
-				annonceInventoryCreaturesOnPlayerJoinMessage = newMsg;
+			case "announceinventorycreaturesonplayerjoinmessage":
+				announceInventoryCreaturesOnPlayerJoinMessage = newMsg;
 				break;
 				
-			case "annoncenewitemsmessage":
-				annonceNewItemsMessage = newMsg;
+			case "announcenewitemsmessage":
+				announceNewItemsMessage = newMsg;
 				break;
 				
-			case "annoncenewcreaturesmessage":
-				annonceNewCreaturesMessage = newMsg;
+			case "announcenewcreaturesmessage":
+				announceNewCreaturesMessage = newMsg;
 				break;
 								
 			default:
@@ -827,17 +831,17 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	private void getChestsAndSigns() {
 		World world = getServer().getWorld(worldName);
 
-		int minXChunck = minX / 16;
-		int maxXChunck = maxX / 16;
-		int minZChunck = minZ / 16;
-		int maxZChunck = maxZ / 16;
+		int minXChunk = minX / 16;
+		int maxXChunk = maxX / 16;
+		int minZChunk = minZ / 16;
+		int maxZChunk = maxZ / 16;
 
 		chests.clear();
 		signsCreatures.clear();
 		signsItems.clear();
 
-		for (int x = minXChunck; x <= maxXChunck; x++) {
-			for (int z = minZChunck; z <= maxZChunck; z++) {
+		for (int x = minXChunk; x <= maxXChunk; x++) {
+			for (int z = minZChunk; z <= maxZChunk; z++) {
 				world.loadChunk(x, z);
 				Chunk chunk = world.getChunkAt(x, z);
 
@@ -874,13 +878,13 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 			World world = getServer().getWorld(worldName);
 
-			int minXChunck = minX / 16;
-			int maxXChunck = maxX / 16;
-			int minZChunck = minZ / 16;
-			int maxZChunck = maxZ / 16;
+			int minXChunk = minX / 16;
+			int maxXChunk = maxX / 16;
+			int minZChunk = minZ / 16;
+			int maxZChunk = maxZ / 16;
 
-			for (int x = minXChunck; x <= maxXChunck; x++) {
-				for (int z = minZChunck; z <= maxZChunck; z++) {
+			for (int x = minXChunk; x <= maxXChunk; x++) {
+				for (int z = minZChunk; z <= maxZChunk; z++) {
 					world.loadChunk(x, z);
 					Chunk chunk = world.getChunkAt(x, z);
 
@@ -916,9 +920,9 @@ public class ItemCollector extends JavaPlugin implements Listener {
 						}
 
 						if (itemsToCollect.contains(itemId)) {
-							if (annonceNewItems && sameLocation(chest, newChest) && !oldItems.contains(itemId)) {
+							if (announceNewItems && sameLocation(chest, newChest) && !oldItems.contains(itemId)) {
 								String displayName = ItemNames.getBlockDisplayName(itemId);
-								broadcastMessage(getMessage(annonceNewItemsMessage, displayName));
+								broadcastMessage(getMessage(announceNewItemsMessage, displayName));
 								oldItems.add(itemId);
 							}						
 
