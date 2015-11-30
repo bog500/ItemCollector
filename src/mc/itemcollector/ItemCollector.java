@@ -42,6 +42,8 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 	SettingsManager settings = SettingsManager.getInstance();
 	CollectionWriter writer;
+	
+	protected UpdateChecker updateChecker;
 
 	private String messagePrefix = ChatColor.ITALIC + "" + ChatColor.GRAY + "[" + ChatColor.GREEN + "ItemCollector"
 			+ ChatColor.GRAY + "]" + ChatColor.RESET;
@@ -98,6 +100,14 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		// setDefaultConfig();
 		
 		callMetric();
+		
+		this.updateChecker = new UpdateChecker(this, "http://dev.bukkit.org/bukkit-plugins/itemcollector/files.rss");
+		if(this.updateChecker.updateNeeded()) {
+			this.getLogger().info(ChatColor.RED + "A new version is available: " + this.updateChecker.getVersion());
+			this.getLogger().info(ChatColor.RED + "Download from: " + this.updateChecker.getLink());
+		}else {
+			this.getLogger().info(ChatColor.GREEN + "ItemCollector is up-to-date");
+		}
 		
 		getSavedConfig();
 		Bukkit.getServer().getPluginManager().registerEvents(this, this);

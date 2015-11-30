@@ -1,5 +1,5 @@
 name: ItemCollector
-version: 0.2.2
+version: 0.2.3
 main: mc.itemcollector.ItemCollector
 author: BOG500
 description: Collect all the items in Minecraft !
