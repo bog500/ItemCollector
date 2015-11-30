@@ -36,13 +36,12 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.spigotmc.Metrics;
 
 public class ItemCollector extends JavaPlugin implements Listener {
 
 	SettingsManager settings = SettingsManager.getInstance();
 	CollectionWriter writer;
-	
+
 	protected UpdateChecker updateChecker;
 
 	private String messagePrefix = ChatColor.ITALIC + "" + ChatColor.GRAY + "[" + ChatColor.GREEN + "ItemCollector"
@@ -57,7 +56,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	private String outputFile = "/itemcollector.json";
 
 	private boolean generateOutputFile = false;
-	
+
 	private boolean collectCreatures = true;
 	private boolean collectItems = true;
 
@@ -77,8 +76,8 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			+ ChatColor.DARK_GREEN + " <nbCollectedCreatures> / <nbTotalCreatures>";
 	private String announceNewItemsMessage = ChatColor.DARK_RED + "New item in the collection: " + ChatColor.BOLD + ""
 			+ ChatColor.GREEN + "<itemName>";
-	private String announceNewCreaturesMessage = ChatColor.DARK_RED + "New Creature in the collection: " + ChatColor.BOLD
-			+ "" + ChatColor.GREEN + "<creatureName>";
+	private String announceNewCreaturesMessage = ChatColor.DARK_RED + "New Creature in the collection: "
+			+ ChatColor.BOLD + "" + ChatColor.GREEN + "<creatureName>";
 
 	private List<Map<?, ?>> itemsCollection;
 	private List<Map<?, ?>> creaturesCollection;
@@ -98,30 +97,25 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		settings.setup(this);
 		Bukkit.getServer().getLogger().info("ItemCollector Enabled!");
 		// setDefaultConfig();
-		
+
 		callMetric();
-		
-		this.updateChecker = new UpdateChecker(this, "http://dev.bukkit.org/bukkit-plugins/itemcollector/files.rss");
-		if(this.updateChecker.updateNeeded()) {
-			this.getLogger().info(ChatColor.RED + "A new version is available: " + this.updateChecker.getVersion());
-			this.getLogger().info(ChatColor.RED + "Download from: " + this.updateChecker.getLink());
-		}else {
-			this.getLogger().info(ChatColor.GREEN + "ItemCollector is up-to-date");
-		}
-		
+
+		checkUpdates();
+
 		getSavedConfig();
 		Bukkit.getServer().getPluginManager().registerEvents(this, this);
 
 		writer = new CollectionWriter(outputFile, itemsToCollect, creaturesToCollect);
-		
-		try
-		{
+
+		try {
 			refreshCollections();
+		} catch (Exception ex) {
+			Bukkit.getServer().getLogger().log(Level.SEVERE,
+					ChatColor.RED
+							+ "ItemCollector encountered an error at startup!  Make sure the world and region are defined correctly in the configuration.",
+					ex);
 		}
-		catch(Exception ex) {
-			Bukkit.getServer().getLogger().log(Level.SEVERE, ChatColor.RED + "ItemCollector encountered an error at startup!  Make sure the world and region are defined correctly in the configuration.", ex);
-		}
-		
+
 		writer.setItemsToCollect(itemsToCollect);
 		writer.setCreaturesToCollect(creaturesToCollect);
 		writer.WriteFile(itemsCollected, creaturesCollected);
@@ -132,15 +126,28 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		saveNewConfig();
 		Bukkit.getServer().getLogger().info("ItemCollector Disabled!");
 	}
-	
-	private void callMetric() {
-		try
-		{
-			Metrics metrics = new Metrics();
-			metrics.start();
-		}catch(Exception ex) {
-			// failed
+
+	private void checkUpdates() {
+
+		this.updateChecker = new UpdateChecker(this, "http://dev.bukkit.org/bukkit-plugins/itemcollector/files.rss");
+		if (this.updateChecker.updateNeeded()) {
+			this.getLogger().warning("A new version is available: " + this.updateChecker.getVersion());
+			this.getLogger().warning("Download from: " + this.updateChecker.getLink());
+		} else {
+			this.getLogger().info("ItemCollector is up to date (" + this.getDescription().getVersion() + ")");
 		}
+
+	}
+
+	private void callMetric() {
+
+		try {
+			MetricsLite metrics = new MetricsLite(this);
+			metrics.start();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
 	}
 
 	private void saveNewConfig() {
@@ -155,7 +162,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 		config.set("collectCreatures", collectCreatures);
 		config.set("collectItems", collectItems);
-		
+
 		config.set("generateOutputFile", generateOutputFile);
 
 		config.set("announceInventoryItemsOnPlayerJoin", announceInventoryItemsOnPlayerJoin);
@@ -220,8 +227,8 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		config.addDefault("maxZ", maxZ);
 
 		config.addDefault("worldName", worldName);
-		
-		config.addDefault("outputFile", outputFile);		
+
+		config.addDefault("outputFile", outputFile);
 		config.addDefault("generateOutputFile", generateOutputFile);
 
 		config.addDefault("collectCreatures", collectCreatures);
@@ -239,7 +246,8 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 		config.addDefault("messagePrefix", messagePrefix);
 		config.addDefault("announceInventoryItemsOnPlayerJoinMessage", announceInventoryItemsOnPlayerJoinMessage);
-		config.addDefault("announceInventoryCreaturesOnPlayerJoinMessage", announceInventoryCreaturesOnPlayerJoinMessage);
+		config.addDefault("announceInventoryCreaturesOnPlayerJoinMessage",
+				announceInventoryCreaturesOnPlayerJoinMessage);
 		config.addDefault("announceNewItemsMessage", announceNewItemsMessage);
 		config.addDefault("announceNewCreaturesMessage", announceNewCreaturesMessage);
 
@@ -276,7 +284,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		maxZ = config.getInt("maxZ");
 
 		worldName = config.getString("worldName");
-		outputFile = config.getString("outputFile");		
+		outputFile = config.getString("outputFile");
 
 		collectCreatures = config.getBoolean("collectCreatures");
 		collectItems = config.getBoolean("collectItems");
@@ -294,7 +302,8 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 		messagePrefix = config.getString("messagePrefix");
 		announceInventoryItemsOnPlayerJoinMessage = config.getString("announceInventoryItemsOnPlayerJoinMessage");
-		announceInventoryCreaturesOnPlayerJoinMessage = config.getString("announceInventoryCreaturesOnPlayerJoinMessage");
+		announceInventoryCreaturesOnPlayerJoinMessage = config
+				.getString("announceInventoryCreaturesOnPlayerJoinMessage");
 		announceNewItemsMessage = config.getString("announceNewItemsMessage");
 		announceNewCreaturesMessage = config.getString("announceNewCreaturesMessage");
 
@@ -340,7 +349,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	@EventHandler
 	public void invClose(InventoryCloseEvent event) {
 		if (updateItemsOnChestClosed) {
-			
+
 			if ((event.getInventory().getHolder() instanceof Chest)) {
 				Chest chest = (Chest) event.getInventory().getHolder();
 				if (checkLocation(chest.getLocation())) {
@@ -350,7 +359,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 					refreshItems(chest);
 				}
 			}
-			
+
 			if ((event.getInventory().getHolder() instanceof DoubleChest)) {
 				DoubleChest chest = (DoubleChest) event.getInventory().getHolder();
 				if (checkLocation(chest.getLocation())) {
@@ -376,7 +385,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void onEntityDamage(EntityDamageEvent e) {
-		if(updateCreaturesOnCreatureDamaged) {
+		if (updateCreaturesOnCreatureDamaged) {
 			Entity entity = e.getEntity();
 			if (entity == null)
 				return;
@@ -384,7 +393,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			if (entity instanceof Creature) {
 				Creature a = (Creature) entity;
 				boolean isNew = addCreature(a, true);
-				if(isNew) {
+				if (isNew) {
 					updateAllSigns();
 				}
 			}
@@ -405,7 +414,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent e) {
 
@@ -418,7 +427,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			if (checkLocation(sign.getLocation())) {
 				if (sign.getLine(0).equalsIgnoreCase("[Creatures]")) {
 					refreshCreatures();
-				}else if (sign.getLine(0).equalsIgnoreCase("[Items]")) {
+				} else if (sign.getLine(0).equalsIgnoreCase("[Items]")) {
 					refreshItems(null);
 				}
 			}
@@ -478,7 +487,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				updateSign(sign, null);
 			}
 		}
-		if(generateOutputFile) {
+		if (generateOutputFile) {
 			writer.WriteFile(itemsCollected, creaturesCollected);
 		}
 	}
@@ -496,7 +505,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				nbCollected = creaturesCollected.size();
 				nbCollection = creaturesToCollect.size();
 				updateSign = true;
-				
+
 			} else if (sign.getLine(0).equalsIgnoreCase("[Items]")) {
 				if (signsItems.contains(sign) == false) {
 					signsItems.add(sign);
@@ -510,7 +519,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				sign.setLine(2, ChatColor.RED + " " + nbCollected + "/" + nbCollection);
 				sign.setLine(3, "");
 				sign.update();
-				if(player != null) {
+				if (player != null) {
 					player.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Collection updated");
 				}
 			}
@@ -518,8 +527,8 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	}
 
 	private boolean listCommand(CommandSender sender, String[] args) {
-		
-		if(args.length == 3) {
+
+		if (args.length == 3) {
 			ListType listType = ListType.getListType(args[2]);
 			if (args[1].equalsIgnoreCase("creatures")) {
 				if (sender instanceof Player) {
@@ -545,7 +554,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		}
 		return false;
 	}
-	
+
 	private boolean refreshCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
@@ -590,7 +599,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		}
 		return true;
 	}
-	
+
 	private boolean addCommand(CommandSender sender, String[] args) {
 		if (args.length == 3) {
 			if (args[1].equalsIgnoreCase("creature")) {
@@ -629,11 +638,11 @@ public class ItemCollector extends JavaPlugin implements Listener {
 					sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Item added");
 				}
 				return true;
-			} 
+			}
 		}
 		return false;
 	}
-	
+
 	private boolean removeCommand(CommandSender sender, String[] args) {
 		if (args.length == 3) {
 			if (args[1].equalsIgnoreCase("creature")) {
@@ -676,7 +685,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		}
 		return false;
 	}
-	
+
 	private boolean setCommand(CommandSender sender, String[] args) {
 		if (args.length == 6 && args[1].equalsIgnoreCase("region")) {
 			if (sender instanceof Player) {
@@ -695,8 +704,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			refreshCreatures();
 			sender.sendMessage(messagePrefix + ChatColor.DARK_GREEN + "Region modified");
 			return true;
-		} 
-		else if (args.length == 4 && args[1].equalsIgnoreCase("option")) {
+		} else if (args.length == 4 && args[1].equalsIgnoreCase("option")) {
 			if (sender instanceof Player) {
 				Player player = (Player) sender;
 				if (!player.hasPermission("itemcollector.set.option")) {
@@ -705,59 +713,59 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				}
 			}
 			boolean value = false;
-			try  {
+			try {
 				value = Boolean.getBoolean(args[3]);
-			}catch(Exception ex) {
-				
+			} catch (Exception ex) {
+
 			}
-			switch(args[2].toLowerCase()) {
+			switch (args[2].toLowerCase()) {
 			case "generateoutputfile":
 				generateOutputFile = value;
 				break;
 			case "collectcreatures":
 				collectCreatures = value;
 				break;
-				
+
 			case "collectitems":
 				collectItems = value;
 				break;
-				
+
 			case "announceinventoryitemsonplayerjoin":
 				announceInventoryItemsOnPlayerJoin = value;
 				break;
-				
+
 			case "announceinventorycreaturesonplayerjoin":
 				announceInventoryCreaturesOnPlayerJoin = value;
 				break;
-				
+
 			case "announcenewitems":
 				announceNewItems = value;
 				break;
-				
+
 			case "announcenewcreatures":
 				announceNewCreatures = value;
 				break;
-				
+
 			case "updateitemsonchestclosed":
 				updateItemsOnChestClosed = value;
 				break;
-				
+
 			case "updatecreaturesoncreaturefeed":
 				updateCreaturesOnCreatureFeed = value;
-				
+
 			case "updateCreaturesOnCreatureDamaged":
 				updateCreaturesOnCreatureDamaged = value;
 				break;
-				
+
 			default:
 				sender.sendMessage(messagePrefix + ChatColor.RED + "Invalid parameter '" + args[2].toLowerCase() + "'");
 				return false;
 			}
-			sender.sendMessage(messagePrefix + ChatColor.DARK_PURPLE  + args[2] + ChatColor.GRAY + " set to " + ChatColor.GREEN + Boolean.toString(value));
+			sender.sendMessage(messagePrefix + ChatColor.DARK_PURPLE + args[2] + ChatColor.GRAY + " set to "
+					+ ChatColor.GREEN + Boolean.toString(value));
 			saveNewConfig();
 			return true;
-		}
-		else if (args.length == 4 && args[1].equalsIgnoreCase("world")) {
+		} else if (args.length == 4 && args[1].equalsIgnoreCase("world")) {
 			if (sender instanceof Player) {
 				Player player = (Player) sender;
 				if (!player.hasPermission("itemcollector.set.world")) {
@@ -771,8 +779,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			refreshItems(null);
 			refreshCreatures();
 			return true;
-		}
-		else if (args.length == 4 && args[1].equalsIgnoreCase("outputfile")) {
+		} else if (args.length == 4 && args[1].equalsIgnoreCase("outputfile")) {
 			if (sender instanceof Player) {
 				Player player = (Player) sender;
 				if (!player.hasPermission("itemcollector.set.outputfile")) {
@@ -786,8 +793,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			refreshItems(null);
 			refreshCreatures();
 			return true;
-		}
-		else if (args.length == 4 && args[1].equalsIgnoreCase("message")) {
+		} else if (args.length == 4 && args[1].equalsIgnoreCase("message")) {
 			if (sender instanceof Player) {
 				Player player = (Player) sender;
 				if (!player.hasPermission("itemcollector.set.message")) {
@@ -796,55 +802,56 @@ public class ItemCollector extends JavaPlugin implements Listener {
 				}
 			}
 			String newMsg = args[3];
-			switch(args[2].toLowerCase()) {
+			switch (args[2].toLowerCase()) {
 			case "messagePrefix":
 				messagePrefix = newMsg;
 				break;
-				
+
 			case "announceinventoryitemsonplayerjoinmessage":
 				announceInventoryItemsOnPlayerJoinMessage = newMsg;
 				break;
-				
+
 			case "announceinventorycreaturesonplayerjoinmessage":
 				announceInventoryCreaturesOnPlayerJoinMessage = newMsg;
 				break;
-				
+
 			case "announcenewitemsmessage":
 				announceNewItemsMessage = newMsg;
 				break;
-				
+
 			case "announcenewcreaturesmessage":
 				announceNewCreaturesMessage = newMsg;
 				break;
-								
+
 			default:
 				sender.sendMessage(messagePrefix + ChatColor.RED + "Invalid parameter '" + args[2].toLowerCase() + "'");
 				return false;
 			}
-			sender.sendMessage(messagePrefix + ChatColor.DARK_PURPLE  + args[2] + ChatColor.GRAY + " was " + ChatColor.GREEN + "changed");
+			sender.sendMessage(messagePrefix + ChatColor.DARK_PURPLE + args[2] + ChatColor.GRAY + " was "
+					+ ChatColor.GREEN + "changed");
 			saveNewConfig();
 			return true;
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 
 		if (cmd.getName().equalsIgnoreCase("itemcollector")) {
-			
-			if(args.length >= 1) {
-				if(args[0].equalsIgnoreCase("list")) {
+
+			if (args.length >= 1) {
+				if (args[0].equalsIgnoreCase("list")) {
 					return listCommand(sender, args);
-				}else if(args[0].equalsIgnoreCase("refresh")) {
+				} else if (args[0].equalsIgnoreCase("refresh")) {
 					return refreshCommand(sender, args);
-				}else if(args[0].equalsIgnoreCase("count")) {
+				} else if (args[0].equalsIgnoreCase("count")) {
 					return countCommand(sender, args);
-				}else if(args[0].equalsIgnoreCase("add")) {
+				} else if (args[0].equalsIgnoreCase("add")) {
 					return addCommand(sender, args);
-				}else if(args[0].equalsIgnoreCase("remove")) {
+				} else if (args[0].equalsIgnoreCase("remove")) {
 					return removeCommand(sender, args);
-				}else if(args[0].equalsIgnoreCase("set")) {
+				} else if (args[0].equalsIgnoreCase("set")) {
 					return setCommand(sender, args);
 				}
 			}
@@ -948,7 +955,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 								String displayName = ItemNames.getBlockDisplayName(itemId);
 								broadcastMessage(getMessage(announceNewItemsMessage, displayName));
 								oldItems.add(itemId);
-							}						
+							}
 
 							itemsCollected.add(itemId);
 						}
@@ -971,7 +978,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			}
 		}
 		Collections.sort(messages);
-		for(String msg : messages) {
+		for (String msg : messages) {
 			sender.sendMessage(msg);
 		}
 	}
@@ -987,7 +994,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 			}
 		}
 		Collections.sort(messages);
-		for(String msg : messages) {
+		for (String msg : messages) {
 			sender.sendMessage(msg);
 		}
 	}
@@ -1006,40 +1013,39 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		}
 	}
 
-	
 	private boolean sameLocation(Object inv1, Object inv2) {
-		
+
 		if (inv1 == null || inv2 == null) {
 			return false;
 		}
-		
+
 		Location loc1 = null;
 		Location loc2 = null;
-		
-		if(inv1 instanceof BlockState) {
-			BlockState block = (BlockState)inv1;
+
+		if (inv1 instanceof BlockState) {
+			BlockState block = (BlockState) inv1;
 			loc1 = block.getLocation();
-		}else if(inv1 instanceof DoubleChest) {
-			DoubleChest doublechest = (DoubleChest)inv1;
+		} else if (inv1 instanceof DoubleChest) {
+			DoubleChest doublechest = (DoubleChest) inv1;
 			loc1 = doublechest.getLocation();
 		}
-		
-		if(inv2 instanceof BlockState) {
-			BlockState block = (BlockState)inv2;
+
+		if (inv2 instanceof BlockState) {
+			BlockState block = (BlockState) inv2;
 			loc2 = block.getLocation();
-		}else if(inv2 instanceof DoubleChest) {
-			DoubleChest doublechest = (DoubleChest)inv2;
+		} else if (inv2 instanceof DoubleChest) {
+			DoubleChest doublechest = (DoubleChest) inv2;
 			loc2 = doublechest.getLocation();
 		}
-		
-		if(loc1 == null || loc2 == null)
+
+		if (loc1 == null || loc2 == null)
 			return false;
-				
+
 		return (Math.floor(loc1.getX()) == Math.floor(loc2.getX()) || Math.ceil(loc1.getX()) == Math.ceil(loc2.getX()))
-				&&
-				(Math.floor(loc1.getY()) == Math.floor(loc2.getY()) || Math.ceil(loc1.getY()) == Math.ceil(loc2.getY()))
-				&&
-				(Math.floor(loc1.getZ()) == Math.floor(loc2.getZ()) || Math.ceil(loc1.getZ()) == Math.ceil(loc2.getZ()));
-		
+				&& (Math.floor(loc1.getY()) == Math.floor(loc2.getY())
+						|| Math.ceil(loc1.getY()) == Math.ceil(loc2.getY()))
+				&& (Math.floor(loc1.getZ()) == Math.floor(loc2.getZ())
+						|| Math.ceil(loc1.getZ()) == Math.ceil(loc2.getZ()));
+
 	}
 }

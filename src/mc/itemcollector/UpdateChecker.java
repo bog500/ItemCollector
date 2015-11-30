@@ -30,15 +30,16 @@ public class UpdateChecker {
 	public boolean updateNeeded() {
 		
 		try {
+			plugin.getLogger().info("version: " + plugin.getDescription().getVersion());
 			InputStream input =	this.filesFeed.openConnection().getInputStream();
 			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(input);
 			Node latestFile = document.getElementsByTagName("item").item(0);
 			NodeList children = latestFile.getChildNodes();
 			
-			this.version = children.item(1).getTextContent().replaceAll("[a-zA-Z ]", "");
+			this.version = children.item(1).getTextContent().replace(" ", "").replaceAll("[a-zA-Z]", "");
 			this.link = children.item(3).getTextContent();
 			
-			if(plugin.getDescription().getVersion().equals(this.version)) {
+			if(!plugin.getDescription().getVersion().equals(this.version)) {
 				return true;
 			}
 			

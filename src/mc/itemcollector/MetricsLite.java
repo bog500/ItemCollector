@@ -1,20 +1,3 @@
-package mc.itemcollector;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.Proxy;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.zip.GZIPOutputStream;
-
 /*
  * Copyright 2011-2013 Tyler Blair. All rights reserved.
  *
@@ -43,9 +26,30 @@ import java.util.zip.GZIPOutputStream;
  * either expressed or implied, of anybody else.
  */
 
+package mc.itemcollector;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
+import java.net.Proxy;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.util.Collection;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.zip.GZIPOutputStream;
+
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.scheduler.BukkitTask;
@@ -274,6 +278,28 @@ public class MetricsLite {
         // return => base/plugins/PluginMetrics/config.yml
         return new File(new File(pluginsFolder, "PluginMetrics"), "config.yml");
     }
+    
+    /**
+     * Gets the online player (backwards compatibility)
+     * 
+     * @return online player amount
+     */
+    private int getOnlinePlayers() {
+        try {
+            Method onlinePlayerMethod = Server.class.getMethod("getOnlinePlayers");
+            if(onlinePlayerMethod.getReturnType().equals(Collection.class)) {
+                return ((Collection<?>)onlinePlayerMethod.invoke(Bukkit.getServer())).size();
+            } else {
+                return ((Player[])onlinePlayerMethod.invoke(Bukkit.getServer())).length;
+            }
+        } catch (Exception ex) {
+            if (debug) {
+                Bukkit.getLogger().log(Level.INFO, "[Metrics] " + ex.getMessage());
+            }
+        }
+        
+        return 0;
+    }
 
     /**
      * Generic method that posts a plugin to the metrics website
@@ -285,7 +311,7 @@ public class MetricsLite {
         boolean onlineMode = Bukkit.getServer().getOnlineMode(); // TRUE if online mode is enabled
         String pluginVersion = description.getVersion();
         String serverVersion = Bukkit.getVersion();
-        int playersOnline = Bukkit.getServer().getOnlinePlayers().size();
+        int playersOnline = this.getOnlinePlayers();
 
         // END server software specific section -- all code below does not use any code outside of this class / Java
 
