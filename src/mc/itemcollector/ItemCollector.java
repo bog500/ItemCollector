@@ -36,6 +36,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.spigotmc.Metrics;
 
 public class ItemCollector extends JavaPlugin implements Listener {
 
@@ -95,6 +96,9 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		settings.setup(this);
 		Bukkit.getServer().getLogger().info("ItemCollector Enabled!");
 		// setDefaultConfig();
+		
+		callMetric();
+		
 		getSavedConfig();
 		Bukkit.getServer().getPluginManager().registerEvents(this, this);
 
@@ -117,6 +121,16 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	public void onDisable() {
 		saveNewConfig();
 		Bukkit.getServer().getLogger().info("ItemCollector Disabled!");
+	}
+	
+	private void callMetric() {
+		try
+		{
+			Metrics metrics = new Metrics();
+			metrics.start();
+		}catch(Exception ex) {
+			// failed
+		}
 	}
 
 	private void saveNewConfig() {
