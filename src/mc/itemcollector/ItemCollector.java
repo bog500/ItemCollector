@@ -37,16 +37,19 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import mc.itemcollector.Updater.UpdateResult;
+import mc.itemcollector.Updater.UpdateType;
+
 public class ItemCollector extends JavaPlugin implements Listener {
 
 	SettingsManager settings = SettingsManager.getInstance();
 	CollectionWriter writer;
 
-	protected UpdateChecker updateChecker;
-
 	private String messagePrefix = ChatColor.ITALIC + "" + ChatColor.GRAY + "[" + ChatColor.GREEN + "ItemCollector"
 			+ ChatColor.GRAY + "]" + ChatColor.RESET;
 
+	private final int CURSE_PROJECT_ID = 95702; 
+	
 	private int minX = -100;
 	private int minZ = -100;
 	private int maxX = 100;
@@ -95,7 +98,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 		settings.setup(this);
-		Bukkit.getServer().getLogger().info("ItemCollector Enabled!");
+		Bukkit.getServer().getLogger().info("ItemCollector " + this.getDescription().getVersion() + " Enabled!");
 		// setDefaultConfig();
 
 		callMetric();
@@ -128,15 +131,18 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	}
 
 	private void checkUpdates() {
-
-		this.updateChecker = new UpdateChecker(this, "http://dev.bukkit.org/bukkit-plugins/itemcollector/files.rss");
-		if (this.updateChecker.updateNeeded()) {
-			this.getLogger().warning("A new version is available: " + this.updateChecker.getVersion());
-			this.getLogger().warning("Download from: " + this.updateChecker.getLink());
-		} else {
-			this.getLogger().info("ItemCollector is up to date (" + this.getDescription().getVersion() + ")");
+		try {
+			Updater updater = new Updater(this, CURSE_PROJECT_ID, this.getFile(), UpdateType.NO_DOWNLOAD, true);
+			if(updater.getResult() == UpdateResult.UPDATE_AVAILABLE) {
+				this.getLogger().info("New version available! " + updater.getLatestName());
+				this.getLogger().info("Download it from: " + updater.getLatestFileLink());
+			}else {
+				this.getLogger().info("ItemCollector is up to date (" + this.getDescription().getVersion() + ")");
+			}
+		}catch(Exception ex) {
+			this.getLogger().warning("An error occured while checking updates.  " + ex.getMessage());
 		}
-
+		
 	}
 
 	private void callMetric() {
