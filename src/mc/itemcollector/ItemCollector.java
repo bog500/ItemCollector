@@ -45,8 +45,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	SettingsManager settings = SettingsManager.getInstance();
 	CollectionWriter writer;
 
-	private String messagePrefix = ChatColor.ITALIC + "" + ChatColor.GRAY + "[" + ChatColor.GREEN + "ItemCollector"
-			+ ChatColor.GRAY + "]" + ChatColor.RESET;
+	private String messagePrefix = ChatColor.ITALIC + "" + ChatColor.GRAY + "[" + ChatColor.GREEN + this.getDescription().getName()+ ChatColor.GRAY + "]" + ChatColor.RESET;
 
 	private final int CURSE_PROJECT_ID = 95702; 
 	
@@ -98,7 +97,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 		settings.setup(this);
-		Bukkit.getServer().getLogger().info("ItemCollector " + this.getDescription().getVersion() + " Enabled!");
+		Bukkit.getServer().getLogger().info(this.getDescription().getName() + " " + this.getDescription().getVersion() + " Enabled!");
 		// setDefaultConfig();
 
 		callMetric();
@@ -115,7 +114,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 		} catch (Exception ex) {
 			Bukkit.getServer().getLogger().log(Level.SEVERE,
 					ChatColor.RED
-							+ "ItemCollector encountered an error at startup!  Make sure the world and region are defined correctly in the configuration.",
+							+ this.getDescription().getName() + " encountered an error at startup!  Make sure the world and region are defined correctly in the configuration.",
 					ex);
 		}
 
@@ -127,7 +126,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 	@Override
 	public void onDisable() {
 		saveNewConfig();
-		Bukkit.getServer().getLogger().info("ItemCollector Disabled!");
+		Bukkit.getServer().getLogger().info(this.getDescription().getName() + " Disabled!");
 	}
 
 	private void checkUpdates() {
