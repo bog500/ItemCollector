@@ -357,7 +357,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 			if ((event.getInventory().getHolder() instanceof Chest)) {
 				Chest chest = (Chest) event.getInventory().getHolder();
-				if (checkLocation(chest.getLocation())) {
+				if (chest != null && checkLocation(chest.getLocation())) {
 					if (!chests.contains(chest)) {
 						chests.add(chest);
 					}
@@ -367,7 +367,7 @@ public class ItemCollector extends JavaPlugin implements Listener {
 
 			if ((event.getInventory().getHolder() instanceof DoubleChest)) {
 				DoubleChest chest = (DoubleChest) event.getInventory().getHolder();
-				if (checkLocation(chest.getLocation())) {
+				if (chest != null && checkLocation(chest.getLocation())) {
 					if (!chests.contains(chest)) {
 						chests.add(chest);
 					}
